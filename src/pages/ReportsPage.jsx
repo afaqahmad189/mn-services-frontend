@@ -1,31 +1,65 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api, useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#1565C0', '#42A5F5', '#2E7D32', '#E65100', '#C62828', '#6A1B9A'];
 
+const STATUS_COLORS = {
+  PENDING: 'badge-warning',
+  ACTIVE: 'badge-info',
+  COMPLETED: 'badge-success',
+  CANCELLED: 'badge-danger',
+  RECEIVED: 'badge-success',
+  PAID: 'badge-success',
+  DELIVERED: 'badge-success',
+};
+
 export default function ReportsPage() {
   const { hasPermission } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState('financial');
   const [financial, setFinancial] = useState(null);
   const [cases, setCases] = useState([]);
+  const [casesTotal, setCasesTotal] = useState(0);
+  const [casesPage, setCasesPage] = useState(1);
   const [pending, setPending] = useState([]);
+  const [pendingTotal, setPendingTotal] = useState(0);
+  const [pendingPage, setPendingPage] = useState(1);
   const [monthly, setMonthly] = useState([]);
   const [cashBook, setCashBook] = useState(null);
   const [filters, setFilters] = useState({ from: '', to: '', status: '', search: '', cashBookDate: new Date().toISOString().split('T')[0] });
+  const limit = 20;
+
+  const searchRef = useRef(null);
 
   const load = async () => {
     const [f, c, p, m, cb] = await Promise.all([
       api.get('/reports/financial', { params: filters }),
-      api.get('/reports/cases', { params: filters }),
-      api.get('/reports/pending-balances'),
+      api.get('/reports/cases', { params: { ...filters, page: casesPage, limit } }),
+      api.get('/reports/pending-balances', { params: { page: pendingPage, limit } }),
       api.get('/reports/monthly-revenue'),
       api.get('/reports/cash-book', { params: { date: filters.cashBookDate } }),
     ]);
-    setFinancial(f.data); setCases(c.data); setPending(p.data); setMonthly(m.data); setCashBook(cb.data);
+    setFinancial(f.data);
+    setCases(c.data.data);
+    setCasesTotal(c.data.total);
+    setPending(p.data.data);
+    setPendingTotal(p.data.total);
+    setMonthly(m.data);
+    setCashBook(cb.data);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      load();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [filters, casesPage, pendingPage]);
+
+  useEffect(() => {
+    searchRef.current?.focus();
+  }, [tab]);
 
   return (
     <div>
@@ -41,14 +75,25 @@ export default function ReportsPage() {
       <div className="page-content">
         {/* FILTERS */}
         <div className="filter-bar mb-6">
-          <input type="text" className="form-control" style={{ width: '200px' }} placeholder="Search invoice/customer..." value={filters.search} onChange={e => setFilters(f => ({ ...f, search: e.target.value }))} autoFocus />
+          <input 
+            ref={searchRef}
+            type="text" 
+            className="form-control" 
+            style={{ width: '250px' }} 
+            placeholder="🔍 Search anything..." 
+            value={filters.search} 
+            onChange={e => setFilters(f => ({ ...f, search: e.target.value }))} 
+            autoFocus 
+          />
           <input type="date" className="form-control" style={{ width: '160px' }} value={filters.from} onChange={e => setFilters(f => ({ ...f, from: e.target.value }))} />
           <span>→</span>
           <input type="date" className="form-control" style={{ width: '160px' }} value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} />
           <select className="form-control" style={{ width: '160px' }} value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}>
             <option value="">All Status</option><option value="ACTIVE">Active</option><option value="COMPLETED">Completed</option>
           </select>
-          <button className="btn btn-primary btn-sm" onClick={load}>Apply Filters</button>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>
+            {casesTotal} results found
+          </div>
         </div>
 
         {/* FINANCIAL SUMMARY */}
@@ -99,25 +144,33 @@ export default function ReportsPage() {
           <div className="card" style={{ padding: 0 }}>
             <div className="table-container">
               <table>
-                <thead><tr><th>Invoice No.</th><th>Customer</th><th>Reg. No.</th><th>Excise Office</th><th>Status</th><th>Challan</th><th>Total</th><th>Balance</th><th>Date</th></tr></thead>
+                <thead>
+                  <tr><th>Invoice #</th><th>Customer</th><th>Registration</th><th>Vendor</th><th>Status</th><th>Amount</th><th>Created</th></tr>
+                </thead>
                 <tbody>
-                  {cases.length === 0 ? <tr><td colSpan={9}><div className="empty-state" style={{ padding: '30px' }}><div className="empty-state-icon">📊</div><h3>No data</h3></div></td></tr>
-                  : cases.map(inv => (
+                  {cases.map(inv => (
                     <tr key={inv.id}>
-                      <td style={{ color: 'var(--primary)', fontWeight: 600 }}>{inv.invoiceNumber}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                        {inv.invoiceNumber}
+                      </td>
                       <td>{inv.customer?.name}</td>
                       <td>{inv.registrationNo}</td>
-                      <td>{inv.exciseOffice}</td>
-                      <td><span className={`badge ${inv.status === 'COMPLETED' ? 'badge-success' : 'badge-info'}`}>{inv.status}</span></td>
-                      <td><span className={`badge ${inv.challanStatus === 'PAID' ? 'badge-success' : 'badge-warning'}`}>{inv.challanStatus}</span></td>
+                      <td>{inv.vendor?.name}</td>
+                      <td><span className={`badge ${STATUS_COLORS[inv.status] || 'badge-info'}`}>{inv.status}</span></td>
                       <td>Rs. {(+inv.totalAmount || 0).toLocaleString()}</td>
-                      <td style={{ color: +inv.remainingBalance > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 600 }}>Rs. {(+inv.remainingBalance || 0).toLocaleString()}</td>
-                      <td style={{ fontSize: '0.8rem' }}>{new Date(inv.createdAt).toLocaleDateString()}</td>
+                      <td>{new Date(inv.createdAt).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+            {casesTotal > limit && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '16px', borderTop: '1px solid var(--border)' }}>
+                <button className="btn btn-sm" disabled={casesPage === 1} onClick={() => setCasesPage(p => p - 1)}>← Previous</button>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Page <strong>{casesPage}</strong> of {Math.ceil(casesTotal / limit)} ({casesTotal} cases)</span>
+                <button className="btn btn-sm" disabled={casesPage >= Math.ceil(casesTotal / limit)} onClick={() => setCasesPage(p => p + 1)}>Next →</button>
+              </div>
+            )}
           </div>
         )}
 
@@ -125,16 +178,18 @@ export default function ReportsPage() {
           <div className="card" style={{ padding: 0 }}>
             <div className="table-container">
               <table>
-                <thead><tr><th>Invoice No.</th><th>Customer</th><th>Phone</th><th>Total</th><th>Received</th><th>Balance</th><th>Days Open</th></tr></thead>
+                <thead>
+                  <tr><th>Customer</th><th>Invoice #</th><th>Total Bill</th><th>Amount Received</th><th>Balance</th><th>Aging</th></tr>
+                </thead>
                 <tbody>
-                  {pending.length === 0 ? <tr><td colSpan={7}><div className="empty-state" style={{ padding: '30px' }}><div className="empty-state-icon">✅</div><h3>No pending balances!</h3></div></td></tr>
-                  : pending.map(inv => {
+                  {pending.map(inv => {
                     const days = Math.floor((Date.now() - new Date(inv.createdAt)) / 86400000);
                     return (
                       <tr key={inv.id}>
-                        <td style={{ color: 'var(--primary)', fontWeight: 600 }}>{inv.invoiceNumber}</td>
-                        <td style={{ fontWeight: 600 }}>{inv.customer?.name}</td>
-                        <td>{inv.customer?.phone}</td>
+                        <td>{inv.customer?.name}</td>
+                        <td style={{ fontWeight: 600, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                          {inv.invoiceNumber}
+                        </td>
                         <td>Rs. {(+inv.totalAmount || 0).toLocaleString()}</td>
                         <td style={{ color: 'var(--success)' }}>Rs. {(+inv.amountReceived || 0).toLocaleString()}</td>
                         <td style={{ color: 'var(--danger)', fontWeight: 700 }}>Rs. {(+inv.remainingBalance || 0).toLocaleString()}</td>
@@ -145,6 +200,13 @@ export default function ReportsPage() {
                 </tbody>
               </table>
             </div>
+            {pendingTotal > limit && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '16px', borderTop: '1px solid var(--border)' }}>
+                <button className="btn btn-sm" disabled={pendingPage === 1} onClick={() => setPendingPage(p => p - 1)}>← Previous</button>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Page <strong>{pendingPage}</strong> of {Math.ceil(pendingTotal / limit)} ({pendingTotal} entries)</span>
+                <button className="btn btn-sm" disabled={pendingPage >= Math.ceil(pendingTotal / limit)} onClick={() => setPendingPage(p => p + 1)}>Next →</button>
+              </div>
+            )}
           </div>
         )}
 
