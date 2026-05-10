@@ -44,7 +44,7 @@ export default function CustomersPage() {
         <div className="filter-bar">
           <div className="header-search" style={{ flex: 1 }}>
             <span>🔍</span>
-            <input placeholder="Search name, phone, CNIC..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />
+            <input placeholder="Search name, phone, CNIC..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} autoFocus />
           </div>
           <button className="btn btn-outline btn-sm" onClick={load}>🔄 Refresh</button>
         </div>

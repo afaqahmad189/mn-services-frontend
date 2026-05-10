@@ -83,52 +83,161 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {delayed?.delayedByVendor?.length > 0 && (
-                <>
-                  <div className="section-divider">⏰ Delayed by Vendor</div>
-                  {delayed.delayedByVendor.slice(0, 3).map(inv => (
-                    <div key={inv.id} className="alert-banner warning" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
-                      <span>⚠️</span>
-                      <div>
-                        <strong>{inv.customer?.name || 'N/A'}</strong> — {inv.invoiceNumber}<br />
-                        <small>Number plate pending 15+ days after biometric completion</small>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-
+              {/* DELAYED BY CUSTOMER */}
               {delayed?.delayedByCustomer?.length > 0 && (
                 <>
-                  <div className="section-divider">👤 Waiting on Customer</div>
+                  <div className="section-divider">👤 Action Required by Customer</div>
                   {delayed.delayedByCustomer.slice(0, 3).map(inv => (
                     <div key={inv.id} className="alert-banner info" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
                       <span>ℹ️</span>
                       <div>
-                        <strong>{inv.customer?.name || 'N/A'}</strong> — {inv.invoiceNumber}<br />
-                        <small>Challan received but payment pending 3+ days</small>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Challan received but payment pending for {Math.floor((Date.now() - new Date(inv.challanReceivedDate))/86400000)} days</small>
                       </div>
                     </div>
                   ))}
                 </>
               )}
 
-              {delayed?.fileCollectionPending?.length > 0 && (
+              {delayed?.challanPaidPendingBiometric?.length > 0 && (
                 <>
-                  <div className="section-divider">📁 File Collection Pending</div>
-                  {delayed.fileCollectionPending.slice(0, 3).map(inv => (
+                  <div className="section-divider">🤚 Biometric Pending</div>
+                  {delayed.challanPaidPendingBiometric.slice(0, 3).map(inv => (
+                    <div key={inv.id} className="alert-banner warning" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                      <span>⚠️</span>
+                      <div>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Challan paid but biometric pending for {Math.floor((Date.now() - new Date(inv.challanPaidDate))/86400000)} days</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* NUMBER PLATE ALERTS */}
+              {delayed?.plateDelayedByOffice?.length > 0 && (
+                <>
+                  <div className="section-divider">🏢 Plate Pending at Office</div>
+                  {delayed.plateDelayedByOffice.slice(0, 3).map(inv => (
+                    <div key={inv.id} className="alert-banner warning" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                      <span>⚠️</span>
+                      <div>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Biometric done but plate pending for {Math.floor((Date.now() - new Date(inv.biometricDate))/86400000)} days</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {delayed?.plateReceivedNotInformed?.length > 0 && (
+                <>
+                  <div className="section-divider">📢 Inform Customer (Plate)</div>
+                  {delayed.plateReceivedNotInformed.slice(0, 3).map(inv => (
+                    <div key={inv.id} className="alert-banner info" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                      <span>🔔</span>
+                      <div>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Plate received but customer not informed for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate))/86400000)} days</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {delayed?.plateInformedNotCollected?.length > 0 && (
+                <>
+                  <div className="section-divider">🚚 Plate Collection Pending</div>
+                  {delayed.plateInformedNotCollected.slice(0, 3).map(inv => (
+                    <div key={inv.id} className="alert-banner info" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                      <span>⏳</span>
+                      <div>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Customer informed but plate not collected for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate))/86400000)} days</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* INSPECTION ALERTS */}
+              {delayed?.plateReceivedPendingInspection?.length > 0 && (
+                <>
+                  <div className="section-divider">🔍 Inspection Pending</div>
+                  {delayed.plateReceivedPendingInspection.slice(0, 3).map(inv => (
+                    <div key={inv.id} className="alert-banner warning" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                      <span>ℹ️</span>
+                      <div>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Inspection pending for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate))/86400000)} days</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* FILE ALERTS */}
+              {delayed?.inspectionDoneFilePending?.length > 0 && (
+                <>
+                  <div className="section-divider">📄 File Processing Pending</div>
+                  {delayed.inspectionDoneFilePending.slice(0, 3).map(inv => (
+                    <div key={inv.id} className="alert-banner warning" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                      <span>⚠️</span>
+                      <div>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Inspection done but file pending for {Math.floor((Date.now() - new Date(inv.inspectionPhysicalDate))/86400000)} days</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {delayed?.fileReceivedNotDelivered?.length > 0 && (
+                <>
+                  <div className="section-divider">📁 File Delivery Pending</div>
+                  {delayed.fileReceivedNotDelivered.slice(0, 3).map(inv => (
+                    <div key={inv.id} className="alert-banner info" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                      <span>📦</span>
+                      <div>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>File received in office but not delivered for {Math.floor((Date.now() - new Date(inv.fileReceivedDate))/86400000)} days</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {delayed?.smartCardPending?.length > 0 && (
+                <>
+                  <div className="section-divider">💳 Smart Card Pending</div>
+                  {delayed.smartCardPending.slice(0, 3).map(inv => (
                     <div key={inv.id} className="alert-banner danger" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
                       <span>📁</span>
                       <div>
-                        <strong>{inv.customer?.name || 'N/A'}</strong> — {inv.invoiceNumber}<br />
-                        <small>File received 5+ days ago, customer not collected</small>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Smart card pending for {Math.floor((Date.now() - new Date(inv.createdAt))/86400000)} days</small>
                       </div>
                     </div>
                   ))}
                 </>
               )}
 
-              {!delayed?.delayedByVendor?.length && !delayed?.delayedByCustomer?.length && !delayed?.fileCollectionPending?.length && (
+              {delayed?.smartCardReceivedNotDelivered?.length > 0 && (
+                <>
+                  <div className="section-divider">💳 Smart Card Collection Pending</div>
+                  {delayed.smartCardReceivedNotDelivered.slice(0, 3).map(inv => (
+                    <div key={inv.id} className="alert-banner info" style={{ cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
+                      <span>📩</span>
+                      <div>
+                        <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
+                        <small>Smart card received in office but not delivered for {Math.floor((Date.now() - new Date(inv.smartCardReceivedDate))/86400000)} days</small>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {(!delayed || Object.values(delayed).every(arr => arr.length === 0)) && (
                 <div className="empty-state" style={{ padding: '30px' }}>
                   <div className="empty-state-icon">✅</div>
                   <h3>All Clear!</h3>

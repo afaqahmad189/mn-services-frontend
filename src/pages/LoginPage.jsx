@@ -46,7 +46,10 @@ export default function LoginPage() {
             />
           </div>
           <div className="form-group" style={{ marginBottom: '24px' }}>
-            <label className="form-label required">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <label className="form-label required">Password</label>
+              <button type="button" className="btn-link" style={{ fontSize: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--primary)' }} onClick={() => navigate('/forgot-password')}>Forgot password?</button>
+            </div>
             <input
               type="password" className="form-control"
               value={form.password}

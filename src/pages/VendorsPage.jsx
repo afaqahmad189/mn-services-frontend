@@ -3,6 +3,7 @@ import { api } from '../context/AuthContext';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState([]);
+  const [search, setSearch] = useState('');
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ name: '', city: '', phone: '', email: '', address: '' });
   const [editId, setEditId] = useState(null);
@@ -27,8 +28,24 @@ export default function VendorsPage() {
         </div>
       </div>
       <div className="page-content">
+        <div className="filter-bar mb-6">
+          <div className="header-search" style={{ flex: 1 }}>
+            <span>🔍</span>
+            <input 
+              placeholder="Search vendor name or city..." 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+              autoFocus 
+            />
+          </div>
+          <button className="btn btn-outline btn-sm" onClick={load}>🔄 Refresh</button>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-          {vendors.map(v => (
+          {vendors.filter(v => 
+            v.name?.toLowerCase().includes(search.toLowerCase()) || 
+            v.city?.toLowerCase().includes(search.toLowerCase())
+          ).map(v => (
             <div key={v.id} className="card" style={{ borderTop: '4px solid var(--primary)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>

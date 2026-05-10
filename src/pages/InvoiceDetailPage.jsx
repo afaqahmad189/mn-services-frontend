@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../context/AuthContext';
+import { api, useAuth } from '../context/AuthContext';
 
 const PHASE_STEPS = [
   { key: 'challan', label: 'Challan', icon: '📋', statusField: 'challanStatus' },
@@ -14,6 +14,7 @@ const PHASE_STEPS = [
 const DONE_VALUES = ['PAID', 'COMPLETED', 'DELIVERED', 'RECEIVED', 'RECEIVED_IN_OFFICE', 'ONLINE_COMPLETED', 'PHYSICAL_COMPLETED'];
 
 function PhaseCard({ phase, invoice, onUpdate, onWhatsApp }) {
+  const { hasPermission } = useAuth();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
@@ -134,9 +135,11 @@ function PhaseCard({ phase, invoice, onUpdate, onWhatsApp }) {
           <span className={`badge ${isDone ? 'badge-success' : statusVal !== 'PENDING' ? 'badge-info' : 'badge-warning'}`}>
             {statusVal?.replace(/_/g, ' ')}
           </span>
-          <button className="btn btn-sm btn-outline" onClick={() => setOpen(o => !o)} style={{ marginLeft: 'auto' }}>
-            {open ? 'Close' : '✏️ Update'}
-          </button>
+          {hasPermission('invoice:edit') && (
+            <button className="btn btn-sm btn-outline" onClick={() => setOpen(o => !o)} style={{ marginLeft: 'auto' }}>
+              {open ? 'Close' : '✏️ Update'}
+            </button>
+          )}
           {['file', 'smart-card', 'number-plate', 'challan', 'biometric'].includes(phase.key) && (
             <button className="btn btn-sm" style={{ background: '#25D366', color: '#fff' }} onClick={() => onWhatsApp(phase.key)}>
               💬 WhatsApp
@@ -178,6 +181,11 @@ export default function InvoiceDetailPage() {
   useEffect(() => { load(); api.get('/whatsapp/templates').then(r => setTemplates(r.data)); }, [id]);
 
   const handlePayment = async () => {
+    const amt = parseFloat(payment.amount);
+    if (amt > invoice.remainingBalance) {
+      alert(`⚠️ Payment amount (Rs. ${amt}) cannot be greater than remaining balance (Rs. ${invoice.remainingBalance})`);
+      return;
+    }
     await api.post(`/invoices/${id}/payment`, payment);
     setPayModal(false); setPayment({ amount: '', description: '' }); load();
   };

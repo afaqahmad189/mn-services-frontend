@@ -1,25 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { api } from '../context/AuthContext';
+import { api, useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#1565C0', '#42A5F5', '#2E7D32', '#E65100', '#C62828', '#6A1B9A'];
 
 export default function ReportsPage() {
+  const { hasPermission } = useAuth();
   const [tab, setTab] = useState('financial');
   const [financial, setFinancial] = useState(null);
   const [cases, setCases] = useState([]);
   const [pending, setPending] = useState([]);
   const [monthly, setMonthly] = useState([]);
-  const [filters, setFilters] = useState({ from: '', to: '', status: '' });
+  const [cashBook, setCashBook] = useState(null);
+  const [filters, setFilters] = useState({ from: '', to: '', status: '', search: '', cashBookDate: new Date().toISOString().split('T')[0] });
 
   const load = async () => {
-    const [f, c, p, m] = await Promise.all([
+    const [f, c, p, m, cb] = await Promise.all([
       api.get('/reports/financial', { params: filters }),
       api.get('/reports/cases', { params: filters }),
       api.get('/reports/pending-balances'),
       api.get('/reports/monthly-revenue'),
+      api.get('/reports/cash-book', { params: { date: filters.cashBookDate } }),
     ]);
-    setFinancial(f.data); setCases(c.data); setPending(p.data); setMonthly(m.data);
+    setFinancial(f.data); setCases(c.data); setPending(p.data); setMonthly(m.data); setCashBook(cb.data);
   };
 
   useEffect(() => { load(); }, []);
@@ -29,13 +32,16 @@ export default function ReportsPage() {
       <div style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: '#fff', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div><h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>📊 Reports</h1><p style={{ opacity: 0.8, fontSize: '0.875rem' }}>Analytics & operational insights</p></div>
-          <button className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }} onClick={() => window.print()}>🖨️ Print Report</button>
+          {hasPermission('report:print') && (
+            <button className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }} onClick={() => window.print()}>🖨️ Print Report</button>
+          )}
         </div>
       </div>
 
       <div className="page-content">
         {/* FILTERS */}
         <div className="filter-bar mb-6">
+          <input type="text" className="form-control" style={{ width: '200px' }} placeholder="Search invoice/customer..." value={filters.search} onChange={e => setFilters(f => ({ ...f, search: e.target.value }))} autoFocus />
           <input type="date" className="form-control" style={{ width: '160px' }} value={filters.from} onChange={e => setFilters(f => ({ ...f, from: e.target.value }))} />
           <span>→</span>
           <input type="date" className="form-control" style={{ width: '160px' }} value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} />
@@ -65,9 +71,9 @@ export default function ReportsPage() {
         )}
 
         <div className="tabs">
-          {['financial', 'cases', 'pending'].map(t => (
+          {['financial', 'cases', 'pending', 'cashbook'].map(t => (
             <button key={t} className={`tab-btn ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
-              {t === 'financial' ? '💰 Financial' : t === 'cases' ? '📄 Case Report' : '⚠️ Pending Balances'}
+              {t === 'financial' ? '💰 Financial' : t === 'cases' ? '📄 Case Report' : t === 'pending' ? '⚠️ Pending Balances' : '📒 Daily Cash Book'}
             </button>
           ))}
         </div>
@@ -138,6 +144,97 @@ export default function ReportsPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {tab === 'cashbook' && cashBook && (
+          <div>
+            <div className="filter-bar mb-6" style={{ background: 'var(--primary-50)', padding: '16px', borderRadius: '8px' }}>
+              <label style={{ fontWeight: 600 }}>Select Date:</label>
+              <input type="date" className="form-control" style={{ width: '200px' }} value={filters.cashBookDate} onChange={e => setFilters(f => ({ ...f, cashBookDate: e.target.value }))} />
+              <button className="btn btn-primary" onClick={load}>Generate Cash Book</button>
+            </div>
+
+            <div id="cash-book-printable">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                {/* CASH IN (Urdu & English) */}
+                <div className="card">
+                  <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div className="card-title">💰 Cash In / آمدنی</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Payments Received</div>
+                  </div>
+                  <div className="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Customer / کسٹمر</th>
+                          <th>Invoice / انوائس</th>
+                          <th>Amount / رقم</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cashBook.cashIn.map(item => (
+                          <tr key={item.id}>
+                            <td>{item.customer?.name}</td>
+                            <td>{item.invoice?.invoiceNumber}</td>
+                            <td style={{ color: 'var(--success)', fontWeight: 600 }}>Rs. {(+item.amount).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                        {cashBook.cashIn.length === 0 && <tr><td colSpan={3} style={{ textAlign: 'center', padding: '20px' }}>No income today</td></tr>}
+                      </tbody>
+                      <tfoot>
+                        <tr style={{ background: 'var(--success-50)', fontWeight: 700 }}>
+                          <td colSpan={2}>Total Cash In / کل آمدنی</td>
+                          <td style={{ color: 'var(--success)' }}>Rs. {cashBook.totalIn.toLocaleString()}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+
+                {/* CASH OUT (Urdu & English) */}
+                <div className="card">
+                  <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div className="card-title">💸 Cash Out / اخراجات</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Daily Expenses</div>
+                  </div>
+                  <div className="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Category / کیٹیگری</th>
+                          <th>Description / تفصیل</th>
+                          <th>Amount / رقم</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cashBook.cashOut.map(item => (
+                          <tr key={item.id}>
+                            <td>{item.category}</td>
+                            <td>{item.description}</td>
+                            <td style={{ color: 'var(--danger)', fontWeight: 600 }}>Rs. {(+item.amount).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                        {cashBook.cashOut.length === 0 && <tr><td colSpan={3} style={{ textAlign: 'center', padding: '20px' }}>No expenses today</td></tr>}
+                      </tbody>
+                      <tfoot>
+                        <tr style={{ background: 'var(--danger-50)', fontWeight: 700 }}>
+                          <td colSpan={2}>Total Cash Out / کل اخراجات</td>
+                          <td style={{ color: 'var(--danger)' }}>Rs. {cashBook.totalOut.toLocaleString()}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* SUMMARY CARD */}
+              <div className="card mt-6" style={{ background: 'var(--primary)', color: '#fff', textAlign: 'center', padding: '30px' }}>
+                <div style={{ fontSize: '1rem', opacity: 0.9 }}>NET CASH IN HAND / خالص نقد رقم</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, marginTop: '8px' }}>Rs. {cashBook.netCash.toLocaleString()}</div>
+                <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '4px' }}>Date: {new Date(cashBook.date).toLocaleDateString()}</div>
+              </div>
             </div>
           </div>
         )}

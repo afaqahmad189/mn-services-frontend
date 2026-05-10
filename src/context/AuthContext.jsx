@@ -40,7 +40,9 @@ export function AuthProvider({ children }) {
 
   const hasPermission = (permission) => {
     if (!user) return false;
-    if (user.roles?.includes('SUPER_ADMIN')) return true;
+    // ADMIN has all permissions by default
+    const roles = user.roles?.map(r => r.toUpperCase()) || [];
+    if (roles.includes('ADMIN') || roles.includes('SUPER_ADMIN')) return true;
     return user.permissions?.includes(permission);
   };
 

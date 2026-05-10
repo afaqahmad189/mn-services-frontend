@@ -61,6 +61,7 @@ export default function InvoiceListPage() {
             <input
               type="text" placeholder="Search by invoice no, reg no, customer..."
               value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
+              autoFocus
             />
           </div>
           <select className="form-control" style={{ width: '180px' }} value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}>

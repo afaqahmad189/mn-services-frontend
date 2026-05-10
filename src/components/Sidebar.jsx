@@ -51,24 +51,31 @@ export default function Sidebar({ stats }) {
       </div>
 
       <nav className="sidebar-nav">
-        {navItems.map(section => (
-          <div key={section.section}>
-            <div className="nav-section-label">{section.section}</div>
-            {section.items.map(item => (
-              <div
-                key={item.path}
-                className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
-                onClick={() => navigate(item.path)}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span>{item.label}</span>
-                {item.path === '/invoices' && stats?.pendingChallan > 0 && (
-                  <span className="nav-badge">{stats.pendingChallan}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
+        {navItems.map(section => {
+          // Hide Admin section for non-admins
+          const userRoles = user.roles?.map(r => r.toUpperCase()) || [];
+          const isAdmin = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
+          if (section.section === 'Admin' && !isAdmin) return null;
+          
+          return (
+            <div key={section.section}>
+              <div className="nav-section-label">{section.section}</div>
+              {section.items.map(item => (
+                <div
+                  key={item.path}
+                  className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+                  onClick={() => navigate(item.path)}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                  {item.path === '/invoices' && stats?.pendingChallan > 0 && (
+                    <span className="nav-badge">{stats.pendingChallan}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        })}
       </nav>
 
       <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.10)' }}>

@@ -10,7 +10,6 @@ export default function WhatsAppPage() {
   const load = () => api.get('/whatsapp/templates').then(r => setTemplates(r.data));
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setForm({ name: '', body: '', description: '' }); setEditId(null); setModal(true); };
   const openEdit = (t) => { setForm(t); setEditId(t.id); setModal(true); };
 
   const save = async () => {
@@ -34,7 +33,6 @@ export default function WhatsAppPage() {
           <div><h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>💬 WhatsApp Templates</h1><p style={{ opacity: 0.8, fontSize: '0.875rem' }}>{templates.length} templates configured</p></div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }} onClick={seedDefaults}>⚡ Seed Defaults</button>
-            <button className="btn" style={{ background: '#fff', color: 'var(--primary)', fontWeight: 600 }} onClick={openNew}>+ New Template</button>
           </div>
         </div>
       </div>
@@ -79,7 +77,7 @@ export default function WhatsAppPage() {
       {modal && (
         <div className="modal-overlay" onClick={() => setModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><div className="modal-title">{editId ? '✏️ Edit Template' : '➕ New Template'}</div><button className="btn-icon" onClick={() => setModal(false)}>✕</button></div>
+            <div className="modal-header"><div className="modal-title">✏️ Edit Template</div><button className="btn-icon" onClick={() => setModal(false)}>✕</button></div>
             <div className="modal-body">
               <div className="form-group mb-4"><label className="form-label required">Template Name (KEY)</label><input className="form-control" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. FILE_RECEIVED" /></div>
               <div className="form-group mb-4"><label className="form-label">Description</label><input className="form-control" value={form.description || ''} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>

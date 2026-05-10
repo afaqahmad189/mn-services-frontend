@@ -15,6 +15,9 @@ import WhatsAppPage from './pages/WhatsAppPage';
 import UsersPage from './pages/UsersPage';
 import AuditLogsPage from './pages/AuditLogsPage';
 import VendorsPage from './pages/VendorsPage';
+import LedgerPage from './pages/Ledger';
+import SettingsPage from './pages/SettingsPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { useParams } from 'react-router-dom';
 
 function ProtectedRoute({ children }) {
@@ -41,6 +44,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
         <Route path="invoices" element={<InvoiceListPage />} />
@@ -55,6 +59,8 @@ function AppRoutes() {
         <Route path="whatsapp" element={<WhatsAppPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="audit-logs" element={<AuditLogsPage />} />
+        <Route path="ledger" element={<LedgerPage />} />
+        <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

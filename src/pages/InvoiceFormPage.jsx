@@ -6,10 +6,19 @@ const emptyForm = {
   customerId: '', vendorId: '', registrationNo: '', newRegistrationNo: '',
   exciseOffice: '', referenceNo: '', contactDetails: '', choiceSpecialNo: '',
   purpose: '', vehicle: '', applicationId: '', chassisNo: '', engineNo: '',
-  registrationDate: '', cnic: '', address: '',
+  registrationDate: new Date().toISOString().split('T')[0], cnic: '', address: '',
   challanAmount: 0, serviceCharges: 0, inspectionCharges: 0,
   additionalCharges: 0, discount: 0, amountReceived: 0, remarks: '',
 };
+
+const Field = ({ label, field, type = 'text', required, children, colSpan, form, onChange }) => (
+  <div className="form-group" style={colSpan ? { gridColumn: `span ${colSpan}` } : {}}>
+    <label className={`form-label${required ? ' required' : ''}`}>{label}</label>
+    {children || (
+      <input type={type} className="form-control" value={form[field] || ''} onChange={onChange(field)} required={required} />
+    )}
+  </div>
+);
 
 export default function InvoiceFormPage({ editId }) {
   const navigate = useNavigate();
@@ -73,15 +82,6 @@ export default function InvoiceFormPage({ editId }) {
 
   if (loading) return <div className="page-content"><div className="empty-state"><div className="empty-state-icon">⏳</div><h3>Loading...</h3></div></div>;
 
-  const Field = ({ label, field, type = 'text', required, children, colSpan }) => (
-    <div className="form-group" style={colSpan ? { gridColumn: `span ${colSpan}` } : {}}>
-      <label className={`form-label${required ? ' required' : ''}`}>{label}</label>
-      {children || (
-        <input type={type} className="form-control" value={form[field] || ''} onChange={set(field)} required={required} />
-      )}
-    </div>
-  );
-
   return (
     <div>
       <div style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: '#fff', padding: '24px' }}>
@@ -103,7 +103,7 @@ export default function InvoiceFormPage({ editId }) {
               <div className="card-title">📋 Primary Details</div>
             </div>
             <div className="form-grid">
-              <Field label="Customer" field="customerId" required>
+              <Field label="Customer" field="customerId" required form={form} onChange={set}>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <select className="form-control" value={form.customerId} onChange={set('customerId')} required>
                     <option value="">Select Customer...</option>
@@ -112,26 +112,26 @@ export default function InvoiceFormPage({ editId }) {
                   <button type="button" className="btn btn-outline btn-sm" style={{ whiteSpace: 'nowrap' }} onClick={() => setShowNewCustomer(true)}>+ New</button>
                 </div>
               </Field>
-              <Field label="Excise Office / Vendor" field="vendorId">
+              <Field label="Excise Office / Vendor" field="vendorId" form={form} onChange={set}>
                 <select className="form-control" value={form.vendorId} onChange={set('vendorId')}>
                   <option value="">Select Office...</option>
                   {vendors.map(v => <option key={v.id} value={v.id}>{v.name} — {v.city}</option>)}
                 </select>
               </Field>
-              <Field label="Registration No." field="registrationNo" />
-              <Field label="New Registration No." field="newRegistrationNo" />
-              <Field label="Excise Office (Text)" field="exciseOffice" />
-              <Field label="Reference No." field="referenceNo" />
-              <Field label="Contact Details" field="contactDetails" />
-              <Field label="Choice / Special No." field="choiceSpecialNo" />
-              <Field label="Purpose" field="purpose" />
-              <Field label="Vehicle" field="vehicle" />
-              <Field label="Application ID" field="applicationId" />
-              <Field label="Chassis No." field="chassisNo" />
-              <Field label="Engine No." field="engineNo" />
-              <Field label="CNIC" field="cnic" />
-              <Field label="Registration Date" field="registrationDate" type="date" />
-              <Field label="Address" field="address" />
+              <Field label="Registration No." field="registrationNo" form={form} onChange={set} />
+              <Field label="New Registration No." field="newRegistrationNo" form={form} onChange={set} />
+              <Field label="Excise Office (Text)" field="exciseOffice" form={form} onChange={set} />
+              <Field label="Reference No." field="referenceNo" form={form} onChange={set} />
+              <Field label="Contact Details" field="contactDetails" form={form} onChange={set} />
+              <Field label="Choice / Special No." field="choiceSpecialNo" form={form} onChange={set} />
+              <Field label="Purpose" field="purpose" form={form} onChange={set} />
+              <Field label="Vehicle" field="vehicle" form={form} onChange={set} />
+              <Field label="Application ID" field="applicationId" form={form} onChange={set} />
+              <Field label="Chassis No." field="chassisNo" form={form} onChange={set} />
+              <Field label="Engine No." field="engineNo" form={form} onChange={set} />
+              <Field label="CNIC" field="cnic" form={form} onChange={set} />
+              <Field label="Registration Date" field="registrationDate" type="date" form={form} onChange={set} />
+              <Field label="Address" field="address" form={form} onChange={set} />
             </div>
           </div>
 
@@ -141,12 +141,12 @@ export default function InvoiceFormPage({ editId }) {
               <div className="card-title">💰 Financial Summary</div>
             </div>
             <div className="form-grid-3">
-              <Field label="Challan Amount (Rs.)" field="challanAmount" type="number" />
-              <Field label="Service Charges (Rs.)" field="serviceCharges" type="number" />
-              <Field label="Inspection Charges (Rs.)" field="inspectionCharges" type="number" />
-              <Field label="Additional Charges (Rs.)" field="additionalCharges" type="number" />
-              <Field label="Discount (Rs.)" field="discount" type="number" />
-              <Field label="Amount Received (Rs.)" field="amountReceived" type="number" />
+              <Field label="Challan Amount (Rs.)" field="challanAmount" type="number" form={form} onChange={set} />
+              <Field label="Service Charges (Rs.)" field="serviceCharges" type="number" form={form} onChange={set} />
+              <Field label="Inspection Charges (Rs.)" field="inspectionCharges" type="number" form={form} onChange={set} />
+              <Field label="Additional Charges (Rs.)" field="additionalCharges" type="number" form={form} onChange={set} />
+              <Field label="Discount (Rs.)" field="discount" type="number" form={form} onChange={set} />
+              <Field label="Amount Received (Rs.)" field="amountReceived" type="number" form={form} onChange={set} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '20px', padding: '20px', background: 'var(--primary-50)', borderRadius: 'var(--radius-sm)' }}>
               <div style={{ textAlign: 'center' }}>
