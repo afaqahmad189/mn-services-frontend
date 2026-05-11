@@ -197,9 +197,17 @@ export default function InvoiceDetailPage() {
   };
 
   const sendWhatsApp = async () => {
-    await api.post('/whatsapp/send', { invoiceId: +id, templateName: selectedTemplate });
-    alert('✅ WhatsApp message sent!');
-    setWaModal({ open: false, phase: '' });
+    try {
+      const res = await api.post('/whatsapp/send', { invoiceId: +id, templateName: selectedTemplate });
+      if (res.data.method === 'OFFICIAL_API') {
+        alert('✅ Message sent automatically via Official WhatsApp API!');
+      } else if (res.data.whatsappUrl) {
+        window.open(res.data.whatsappUrl, '_blank');
+      }
+      setWaModal({ open: false, phase: '' });
+    } catch (err) {
+      alert('Error sending WhatsApp message');
+    }
   };
 
   if (loading || !invoice) return <div className="page-content"><div className="empty-state"><div className="empty-state-icon">⏳</div><h3>Loading...</h3></div></div>;
