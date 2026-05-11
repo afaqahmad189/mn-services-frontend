@@ -80,7 +80,21 @@ export default function InvoiceFormPage({ editId }) {
     } finally { setSaving(false); }
   };
 
-  if (loading) return <div className="page-content"><div className="empty-state"><div className="empty-state-icon">⏳</div><h3>Loading...</h3></div></div>;
+  if (loading) return (
+    <div className="page-content">
+      <div className="card">
+        <div className="skeleton skeleton-title" style={{ width: '200px', height: '32px', marginBottom: '24px' }} />
+        <div className="form-grid">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
+            <div key={i} className="form-group">
+              <div className="skeleton" style={{ width: '100px', height: '14px', marginBottom: '8px' }} />
+              <div className="skeleton" style={{ width: '100%', height: '40px', borderRadius: '6px' }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div>

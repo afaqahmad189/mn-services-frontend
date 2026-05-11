@@ -49,14 +49,14 @@ export default function LedgerPage() {
         const dateB = new Date(b.transactionDate || b.createdAt);
         return dateA - dateB || a.id - b.id; // Use ID as secondary sort for same-day entries
       });
-      
+
       let balance = 0;
       const withBalance = sorted.map(entry => {
         if (entry.type === 'DEBIT') balance += +entry.amount;
         else balance -= +entry.amount;
         return { ...entry, runningBalance: balance };
       });
-      
+
       setLedger(withBalance.reverse());
     }).finally(() => setLoading(false));
   };
@@ -75,7 +75,9 @@ export default function LedgerPage() {
         <div className="page-content">
           <div className="card" style={{ padding: 0 }}>
             {loading ? (
-              <div style={{ padding: '40px', textAlign: 'center' }}>Loading ledger entries...</div>
+              <div className="skeleton-container" style={{ padding: '24px' }}>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <div key={i} className="skeleton-row skeleton" style={{ height: '48px' }} />)}
+              </div>
             ) : (
               <div className="table-container">
                 <table>
@@ -99,8 +101,8 @@ export default function LedgerPage() {
                           <td>{entry.description}</td>
                           <td>
                             {entry.invoiceId ? (
-                              <span 
-                                style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }} 
+                              <span
+                                style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
                                 onClick={() => navigate(`/invoices/${entry.invoiceId}`)}
                               >
                                 {entry.invoice?.invoiceNumber || `#${entry.invoiceId}`}
@@ -137,103 +139,116 @@ export default function LedgerPage() {
       </div>
 
       <div className="page-content">
-        {/* SUMMARY CARD */}
-        <div className="stat-grid mb-6">
-          <div className="stat-card">
-            <div className="stat-icon blue">💰</div>
-            <div>
-              <div className="stat-value">Rs. {stats.totalReceivable.toLocaleString()}</div>
-              <div className="stat-label">Total Receivable (کل وصولی)</div>
+        {loading && page === 1 ? (
+          <div className="skeleton-container">
+            <div className="stat-grid mb-6">
+              <div className="skeleton skeleton-stat" />
+              <div className="skeleton skeleton-stat" />
+            </div>
+            <div className="card">
+              <div className="skeleton skeleton-title" />
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <div key={i} className="skeleton-row skeleton" style={{ height: '48px' }} />)}
             </div>
           </div>
-          <div className="stat-card">
-            <div className="stat-icon green">👥</div>
-            <div>
-              <div className="stat-value">{totalCustomers}</div>
-              <div className="stat-label">Total Customers</div>
+        ) : (
+          <>
+            {/* SUMMARY CARD */}
+            <div className="stat-grid mb-6">
+              <div className="stat-card">
+                <div className="stat-icon blue">💰</div>
+                <div>
+                  <div className="stat-value">Rs. {stats.totalReceivable.toLocaleString()}</div>
+                  <div className="stat-label">Total Receivable</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon green">👥</div>
+                <div>
+                  <div className="stat-value">{totalCustomers}</div>
+                  <div className="stat-label">Total Customers</div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* SEARCH & FILTERS */}
-        <div className="filter-bar mb-6">
-          <input 
-            ref={searchRef}
-            type="text" 
-            className="form-control" 
-            style={{ width: '300px' }} 
-            placeholder="🔍 Search customer name, phone, or CNIC..." 
-            value={search} 
-            onChange={e => { setSearch(e.target.value); setPage(1); }} 
-            autoFocus 
-          />
-          <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            Showing {customers.length} of {totalCustomers} customers
-          </div>
-        </div>
+            {/* SEARCH & FILTERS */}
+            <div className="filter-bar mb-6">
+              <input
+                ref={searchRef}
+                type="text"
+                className="form-control"
+                style={{ width: '300px' }}
+                placeholder="🔍 Search customer name, phone, or CNIC..."
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                autoFocus
+              />
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                Showing {customers.length} of {totalCustomers} customers
+              </div>
+            </div>
 
-        {/* CUSTOMER LIST TABLE */}
-        <div className="card" style={{ padding: 0 }}>
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Customer Name</th>
-                  <th>Phone Number</th>
-                  <th>CNIC</th>
-                  <th>Outstanding Balance</th>
-                  <th>Last Transaction</th>
-                  <th style={{ textAlign: 'center' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading && page === 1 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>Loading customers...</td></tr>
-                ) : customers.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>No customers found</td></tr>
-                ) : (
-                  customers.map(c => (
-                    <tr key={c.id}>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{c.name}</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>ID: {c.id}</div>
-                      </td>
-                      <td>{c.phone}</td>
-                      <td>{c.cnic || '—'}</td>
-                      <td>
-                        <span style={{ 
-                          fontWeight: 700, 
-                          color: +c.balance > 0 ? 'var(--danger)' : 'var(--success)',
-                          fontSize: '1rem'
-                        }}>
-                          Rs. {(+c.balance || 0).toLocaleString()}
-                        </span>
-                      </td>
-                      <td style={{ fontSize: '0.85rem' }}>{c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : '—'}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <span 
-                          style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }} 
-                          onClick={() => openLedger(c)}
-                        >
-                          👁️ View Ledger
-                        </span>
-                      </td>
+            {/* CUSTOMER LIST TABLE */}
+            <div className="card" style={{ padding: 0 }}>
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Customer Name</th>
+                      <th>Phone Number</th>
+                      <th>CNIC</th>
+                      <th>Outstanding Balance</th>
+                      <th>Last Transaction</th>
+                      <th style={{ textAlign: 'center' }}>Action</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {customers.length === 0 ? (
+                      <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>No customers found</td></tr>
+                    ) : (
+                      customers.map(c => (
+                        <tr key={c.id}>
+                          <td>
+                            <div style={{ fontWeight: 600 }}>{c.name}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>ID: {c.id}</div>
+                          </td>
+                          <td>{c.phone}</td>
+                          <td>{c.cnic || '—'}</td>
+                          <td>
+                            <span style={{
+                              fontWeight: 700,
+                              color: +c.balance > 0 ? 'var(--danger)' : 'var(--success)',
+                              fontSize: '1rem'
+                            }}>
+                              Rs. {(+c.balance || 0).toLocaleString()}
+                            </span>
+                          </td>
+                          <td style={{ fontSize: '0.85rem' }}>{c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : '—'}</td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span
+                              style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                              onClick={() => openLedger(c)}
+                            >
+                              👁️ View Ledger
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* PAGINATION */}
-          {totalCustomers > limit && (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '16px', borderTop: '1px solid var(--border)' }}>
-              <button className="btn btn-sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>← Previous</button>
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Page <strong>{page}</strong> of {Math.ceil(totalCustomers / limit)}</span>
-              <button className="btn btn-sm" disabled={page >= Math.ceil(totalCustomers / limit)} onClick={() => setPage(p => p + 1)}>Next →</button>
+              {/* PAGINATION */}
+              {totalCustomers > limit && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '16px', borderTop: '1px solid var(--border)' }}>
+                  <button className="btn btn-sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>← Previous</button>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Page <strong>{page}</strong> of {Math.ceil(totalCustomers / limit)}</span>
+                  <button className="btn btn-sm" disabled={page >= Math.ceil(totalCustomers / limit)} onClick={() => setPage(p => p + 1)}>Next →</button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

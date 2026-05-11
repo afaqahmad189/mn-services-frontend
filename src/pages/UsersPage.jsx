@@ -4,13 +4,19 @@ import { api } from '../context/AuthContext';
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ fullName: '', email: '', password: '', phone: '', roleIds: [] });
   const [editId, setEditId] = useState(null);
 
   const load = async () => {
-    const [u, r] = await Promise.all([api.get('/users'), api.get('/users/roles')]);
-    setUsers(u.data); setRoles(r.data);
+    setLoading(true);
+    try {
+      const [u, r] = await Promise.all([api.get('/users'), api.get('/users/roles')]);
+      setUsers(u.data); setRoles(r.data);
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => { load(); }, []);
 
@@ -40,16 +46,28 @@ export default function UsersPage() {
             <table>
               <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Roles</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
-                {users.map(u => (
-                  <tr key={u.id}>
-                    <td style={{ fontWeight: 600 }}>{u.fullName}</td>
-                    <td>{u.email}</td>
-                    <td>{u.phone || '—'}</td>
-                    <td><div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>{u.roles?.map(r => <span key={r.id} className={`badge ${ROLE_COLOR[r.name] || 'badge-gray'}`}>{r.name}</span>)}</div></td>
-                    <td><span className={`badge ${u.isActive ? 'badge-success' : 'badge-gray'}`}>{u.isActive ? 'Active' : 'Inactive'}</span></td>
-                    <td><button className="btn btn-sm btn-outline" onClick={() => openEdit(u)}>✏️ Edit</button></td>
-                  </tr>
-                ))}
+                {loading ? (
+                  [1, 2, 3, 4, 5].map(i => (
+                    <tr key={i}>
+                      <td colSpan={6} style={{ padding: 0 }}>
+                        <div className="skeleton" style={{ height: '52px', margin: '4px 12px', borderRadius: '4px' }} />
+                      </td>
+                    </tr>
+                  ))
+                ) : users.length === 0 ? (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>No users found</td></tr>
+                ) : (
+                  users.map(u => (
+                    <tr key={u.id}>
+                      <td style={{ fontWeight: 600 }}>{u.fullName}</td>
+                      <td>{u.email}</td>
+                      <td>{u.phone || '—'}</td>
+                      <td><div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>{u.roles?.map(r => <span key={r.id} className={`badge ${ROLE_COLOR[r.name] || 'badge-gray'}`}>{r.name}</span>)}</div></td>
+                      <td><span className={`badge ${u.isActive ? 'badge-success' : 'badge-gray'}`}>{u.isActive ? 'Active' : 'Inactive'}</span></td>
+                      <td><button className="btn btn-sm btn-outline" onClick={() => openEdit(u)}>✏️ Edit</button></td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

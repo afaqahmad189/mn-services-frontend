@@ -3,12 +3,16 @@ import { api } from '../context/AuthContext';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ name: '', city: '', phone: '', email: '', address: '' });
   const [editId, setEditId] = useState(null);
 
-  const load = () => api.get('/vendors').then(r => setVendors(r.data));
+  const load = () => {
+    setLoading(true);
+    api.get('/vendors').then(r => setVendors(r.data)).finally(() => setLoading(false));
+  };
   useEffect(() => { load(); }, []);
 
   const openNew = () => { setForm({ name: '', city: '', phone: '', email: '', address: '' }); setEditId(null); setModal(true); };
@@ -18,6 +22,11 @@ export default function VendorsPage() {
     else await api.post('/vendors', form);
     setModal(false); load();
   };
+
+  const filteredVendors = vendors.filter(v =>
+    v.name?.toLowerCase().includes(search.toLowerCase()) ||
+    v.city?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div>
@@ -42,29 +51,40 @@ export default function VendorsPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-          {vendors.filter(v => 
-            v.name?.toLowerCase().includes(search.toLowerCase()) || 
-            v.city?.toLowerCase().includes(search.toLowerCase())
-          ).map(v => (
-            <div key={v.id} className="card" style={{ borderTop: '4px solid var(--primary)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '4px' }}>{v.name}</div>
-                  <span className="badge badge-primary">{v.city}</span>
+          {loading ? (
+            [1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div className="skeleton" style={{ width: '120px', height: '24px' }} />
+                  <div className="skeleton" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
                 </div>
-                <button className="btn btn-sm btn-outline" onClick={() => openEdit(v)}>✏️</button>
+                <div className="skeleton" style={{ width: '60px', height: '20px', marginBottom: '16px' }} />
+                <div className="skeleton" style={{ width: '100%', height: '16px', marginBottom: '8px' }} />
+                <div className="skeleton" style={{ width: '80%', height: '16px' }} />
               </div>
-              <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {v.phone && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>📞 {v.phone}</div>}
-                {v.email && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>✉️ {v.email}</div>}
-                {v.address && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>📍 {v.address}</div>}
+            ))
+          ) : filteredVendors.length === 0 ? (
+            <div className="card" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🏢</div>
+              <div style={{ fontWeight: 600 }}>No vendors found</div>
+            </div>
+          ) : (
+            filteredVendors.map(v => (
+              <div key={v.id} className="card" style={{ borderTop: '4px solid var(--primary)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '4px' }}>{v.name}</div>
+                    <span className="badge badge-primary">{v.city}</span>
+                  </div>
+                  <button className="btn btn-sm btn-outline" onClick={() => openEdit(v)}>✏️</button>
+                </div>
+                <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {v.phone && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>📞 {v.phone}</div>}
+                  {v.email && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>✉️ {v.email}</div>}
+                  {v.address && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>📍 {v.address}</div>}
+                </div>
               </div>
-            </div>
-          ))}
-          {vendors.length === 0 && (
-            <div className="card" style={{ gridColumn: '1/-1' }}>
-              <div className="empty-state"><div className="empty-state-icon">🏢</div><h3>No vendors added yet</h3><button className="btn btn-primary mt-4" onClick={openNew}>+ Add First Vendor</button></div>
-            </div>
+            ))
           )}
         </div>
       </div>

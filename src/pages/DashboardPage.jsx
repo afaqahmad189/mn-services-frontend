@@ -32,10 +32,34 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ width: '48px', height: '48px', border: '4px solid var(--primary-100)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <p style={{ color: 'var(--text-secondary)' }}>Loading dashboard...</p>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div className="page-content">
+      {/* Skeleton Stat Grid */}
+      <div className="stat-grid mb-6">
+        {[1,2,3,4,5,6,7,8].map(i => (
+          <div key={i} className="stat-card">
+            <div className="skeleton" style={{ width: '48px', height: '48px', borderRadius: '12px' }} />
+            <div style={{ flex: 1 }}>
+              <div className="skeleton skeleton-text" style={{ width: '40%', height: '24px' }} />
+              <div className="skeleton skeleton-text" style={{ width: '60%' }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid-2 gap-6">
+        <div className="card">
+          <div className="skeleton skeleton-title" />
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className="skeleton" style={{ height: '60px', marginBottom: '12px', borderRadius: '8px' }} />
+          ))}
+        </div>
+        <div className="card">
+          <div className="skeleton skeleton-title" />
+          {[1,2,3,4,5,6,7,8].map(i => (
+            <div key={i} className="skeleton-row skeleton" style={{ height: '45px' }} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 

@@ -168,7 +168,7 @@ export default function InvoiceDetailPage() {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [payModal, setPayModal] = useState(false);
-  const [payment, setPayment] = useState({ amount: '', description: '' });
+  const [payment, setPayment] = useState({ amount: '', description: '', paymentMethod: 'CASH' });
   const [waModal, setWaModal] = useState({ open: false, phase: '' });
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('');
@@ -181,13 +181,9 @@ export default function InvoiceDetailPage() {
   useEffect(() => { load(); api.get('/whatsapp/templates').then(r => setTemplates(r.data)); }, [id]);
 
   const handlePayment = async () => {
-    const amt = parseFloat(payment.amount);
-    if (amt > invoice.remainingBalance) {
-      alert(`⚠️ Payment amount (Rs. ${amt}) cannot be greater than remaining balance (Rs. ${invoice.remainingBalance})`);
-      return;
-    }
+    if (!payment.amount) return alert('Enter amount');
     await api.post(`/invoices/${id}/payment`, payment);
-    setPayModal(false); setPayment({ amount: '', description: '' }); load();
+    setPayModal(false); setPayment({ amount: '', description: '', paymentMethod: 'CASH' }); load();
   };
 
   const handleWhatsApp = async (phase) => {
@@ -210,7 +206,37 @@ export default function InvoiceDetailPage() {
     }
   };
 
-  if (loading || !invoice) return <div className="page-content"><div className="empty-state"><div className="empty-state-icon">⏳</div><h3>Loading...</h3></div></div>;
+  if (loading || !invoice) return (
+    <div className="page-content">
+      <div className="skeleton" style={{ height: '120px', borderRadius: 'var(--radius)', marginBottom: '24px' }} />
+      <div className="grid-2 gap-6">
+        <div>
+          <div className="card mb-6">
+            <div className="skeleton skeleton-title" />
+            <div className="grid-3 gap-4">
+              {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: '80px' }} />)}
+            </div>
+          </div>
+          <div className="card">
+            <div className="skeleton skeleton-title" />
+            {[1,2,3,4].map(i => <div key={i} className="skeleton-row skeleton" style={{ height: '40px' }} />)}
+          </div>
+        </div>
+        <div className="card">
+          <div className="skeleton skeleton-title" />
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className="flex gap-4 mb-6">
+              <div className="skeleton skeleton-avatar" />
+              <div style={{ flex: 1 }}>
+                <div className="skeleton skeleton-text" style={{ width: '30%' }} />
+                <div className="skeleton skeleton-text" style={{ width: '100%', height: '60px' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -323,6 +349,14 @@ export default function InvoiceDetailPage() {
             <div className="modal-header"><div className="modal-title">💰 Record Payment</div><button className="btn-icon" onClick={() => setPayModal(false)}>✕</button></div>
             <div className="modal-body">
               <div className="form-group mb-4"><label className="form-label required">Amount (Rs.)</label><input type="number" className="form-control" value={payment.amount} onChange={e => setPayment(p => ({ ...p, amount: e.target.value }))} /></div>
+              <div className="form-group mb-4">
+                <label className="form-label required">Payment Method</label>
+                <select className="form-control" value={payment.paymentMethod} onChange={e => setPayment(p => ({ ...p, paymentMethod: e.target.value }))}>
+                  <option value="CASH">Cash (Physical Hand)</option>
+                  <option value="BANK">Bank Transfer (Digital)</option>
+                  <option value="CHEQUE">Cheque</option>
+                </select>
+              </div>
               <div className="form-group"><label className="form-label">Description</label><input className="form-control" value={payment.description} onChange={e => setPayment(p => ({ ...p, description: e.target.value }))} placeholder="e.g. Cash payment" /></div>
             </div>
             <div className="modal-footer"><button className="btn btn-outline" onClick={() => setPayModal(false)}>Cancel</button><button className="btn btn-primary" onClick={handlePayment}>Save Payment</button></div>

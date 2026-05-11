@@ -54,25 +54,35 @@ export default function CustomersPage() {
             <table>
               <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>CNIC</th><th>Total Invoiced</th><th>Paid</th><th>Balance</th><th>Actions</th></tr></thead>
               <tbody>
-                {loading ? <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px' }}>Loading...</td></tr>
-                : customers.length === 0 ? <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon">👥</div><h3>No customers found</h3></div></td></tr>
-                : customers.map(c => (
-                  <tr key={c.id}>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{c.id}</td>
-                    <td style={{ fontWeight: 600 }}>{c.name}</td>
-                    <td>{c.phone}</td>
-                    <td>{c.cnic || '—'}</td>
-                    <td>Rs. {(+c.totalDebit || 0).toLocaleString()}</td>
-                    <td style={{ color: 'var(--success)' }}>Rs. {(+c.totalCredit || 0).toLocaleString()}</td>
-                    <td><span className={`badge ${+c.balance > 0 ? 'badge-danger' : 'badge-success'}`}>Rs. {(+c.balance || 0).toLocaleString()}</span></td>
-                    <td>
-                      <div className="table-actions">
-                        <button className="btn btn-sm btn-primary" onClick={() => navigate(`/customers/${c.id}`)}>View</button>
-                        <button className="btn btn-sm btn-outline" onClick={() => openEdit(c)}>Edit</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {loading && page === 1 ? (
+                  [1,2,3,4,5,6,7,8,9,10].map(i => (
+                    <tr key={i}>
+                      <td colSpan={8} style={{ padding: 0 }}>
+                        <div className="skeleton" style={{ height: '52px', margin: '4px 12px', borderRadius: '4px' }} />
+                      </td>
+                    </tr>
+                  ))
+                ) : customers.length === 0 ? (
+                  <tr><td colSpan={8}><div className="empty-state"><div className="empty-state-icon">👥</div><h3>No customers found</h3></div></td></tr>
+                ) : (
+                  customers.map(c => (
+                    <tr key={c.id}>
+                      <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{c.id}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate(`/customers/${c.id}`)}>{c.name}</td>
+                      <td>{c.phone}</td>
+                      <td>{c.cnic || '—'}</td>
+                      <td>Rs. {(+c.totalDebit || 0).toLocaleString()}</td>
+                      <td style={{ color: 'var(--success)' }}>Rs. {(+c.totalCredit || 0).toLocaleString()}</td>
+                      <td><span className={`badge ${+c.balance > 0 ? 'badge-danger' : 'badge-success'}`}>Rs. {(+c.balance || 0).toLocaleString()}</span></td>
+                      <td>
+                        <div className="table-actions">
+                          <button className="btn btn-sm btn-primary" onClick={() => navigate(`/customers/${c.id}`)}>View</button>
+                          <button className="btn btn-sm btn-outline" onClick={() => openEdit(c)}>Edit</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
