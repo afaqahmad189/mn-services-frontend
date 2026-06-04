@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
 
 export default function VendorsPage() {
+  const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -70,18 +72,31 @@ export default function VendorsPage() {
             </div>
           ) : (
             filteredVendors.map(v => (
-              <div key={v.id} className="card" style={{ borderTop: '4px solid var(--primary)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '4px' }}>{v.name}</div>
-                    <span className="badge badge-primary">{v.city}</span>
+              <div key={v.id} className="card" style={{ borderTop: '4px solid var(--primary)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '4px' }}>{v.name}</div>
+                      <span className="badge badge-primary">{v.city}</span>
+                    </div>
+                    <button className="btn btn-sm btn-outline" onClick={() => openEdit(v)}>✏️</button>
                   </div>
-                  <button className="btn btn-sm btn-outline" onClick={() => openEdit(v)}>✏️</button>
+                  <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {v.phone && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>📞 {v.phone}</div>}
+                    {v.email && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>✉️ {v.email}</div>}
+                    {v.address && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>📍 {v.address}</div>}
+                  </div>
                 </div>
-                <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {v.phone && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>📞 {v.phone}</div>}
-                  {v.email && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>✉️ {v.email}</div>}
-                  {v.address && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>📍 {v.address}</div>}
+                <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
+                  <div style={{ fontSize: '0.8rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Balance</div>
+                    <div style={{ fontWeight: 700, color: +v.balance > 0 ? 'var(--danger)' : +v.balance < 0 ? 'var(--success)' : 'inherit' }}>
+                      Rs. {Math.abs(+v.balance || 0).toLocaleString()} {+v.balance > 0 ? '(Owed)' : +v.balance < 0 ? '(Adv)' : ''}
+                    </div>
+                  </div>
+                  <button className="btn btn-sm btn-primary" onClick={() => navigate('/vendor-ledger', { state: { openVendorId: v.id } })}>
+                    📔 Ledger
+                  </button>
                 </div>
               </div>
             ))

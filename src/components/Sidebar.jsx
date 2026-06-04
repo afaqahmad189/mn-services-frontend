@@ -9,7 +9,8 @@ const navItems = [
   { section: 'Cases', items: [
     { path: '/invoices', icon: '📄', label: 'Invoice / Cases' },
     { path: '/customers', icon: '👥', label: 'Customers' },
-    { path: '/ledger', icon: '📒', label: 'Ledger' },
+    { path: '/ledger', icon: '📒', label: 'Customer Ledger' },
+    { path: '/vendor-ledger', icon: '📔', label: 'Vendor Ledger' },
   ]},
   { section: 'Tracking', items: [
     { path: '/vendors', icon: '🏢', label: 'Vendors / Offices' },

@@ -7,7 +7,7 @@ const emptyForm = {
   exciseOffice: '', referenceNo: '', contactDetails: '', choiceSpecialNo: '',
   purpose: '', vehicle: '', applicationId: '', chassisNo: '', engineNo: '',
   registrationDate: new Date().toISOString().split('T')[0], cnic: '', address: '',
-  challanAmount: 0, serviceCharges: 0, inspectionCharges: 0,
+  challanAmount: 0, challanPaidByOfficeOrVendor: 'OFFICE', serviceCharges: 0, inspectionCharges: 0,
   additionalCharges: 0, discount: 0, amountReceived: 0, remarks: '',
 };
 
@@ -46,6 +46,7 @@ export default function InvoiceFormPage({ editId }) {
           ...emptyForm, ...data,
           customerId: data.customerId || '',
           vendorId: data.vendorId || '',
+          challanPaidByOfficeOrVendor: data.challanPaidByOfficeOrVendor || 'OFFICE',
         });
       }).finally(() => setLoading(false));
     }
@@ -156,6 +157,12 @@ export default function InvoiceFormPage({ editId }) {
             </div>
             <div className="form-grid-3">
               <Field label="Challan Amount (Rs.)" field="challanAmount" type="number" form={form} onChange={set} />
+              <Field label="Challan Paid By" field="challanPaidByOfficeOrVendor" form={form} onChange={set}>
+                <select className="form-control" value={form.challanPaidByOfficeOrVendor || 'OFFICE'} onChange={set('challanPaidByOfficeOrVendor')}>
+                  <option value="OFFICE">Our Office (Self)</option>
+                  <option value="VENDOR">Excise Office / Vendor</option>
+                </select>
+              </Field>
               <Field label="Service Charges (Rs.)" field="serviceCharges" type="number" form={form} onChange={set} />
               <Field label="Inspection Charges (Rs.)" field="inspectionCharges" type="number" form={form} onChange={set} />
               <Field label="Additional Charges (Rs.)" field="additionalCharges" type="number" form={form} onChange={set} />

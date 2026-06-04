@@ -290,13 +290,13 @@ export default function ReportsPage() {
                     <div className="card">
                       <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <div className="card-title">💸 Cash Out / اخراجات</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Daily Expenses</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Expenses & Vendor Payments</div>
                       </div>
                       <div className="table-container">
                         <table>
                           <thead>
                             <tr>
-                              <th>Category / کیٹیگری</th>
+                              <th>Type / قسم</th>
                               <th>Description / تفصیل</th>
                               <th>Amount / رقم</th>
                             </tr>
@@ -304,8 +304,20 @@ export default function ReportsPage() {
                           <tbody>
                             {cashBook.cashOut.map(item => (
                               <tr key={item.id}>
-                                <td>{item.category}</td>
-                                <td>{item.description}</td>
+                                <td>
+                                  {item._source === 'VENDOR_PAYMENT' ? (
+                                    <span>
+                                      <span className="badge badge-warning" style={{ marginRight: '6px', fontSize: '0.7rem' }}>Vendor</span>
+                                      {item.vendor?.name || 'Vendor Payment'}
+                                    </span>
+                                  ) : (
+                                    <span>
+                                      <span className="badge badge-info" style={{ marginRight: '6px', fontSize: '0.7rem' }}>Expense</span>
+                                      {item.category || '—'}
+                                    </span>
+                                  )}
+                                </td>
+                                <td style={{ fontSize: '0.875rem' }}>{item.description || '—'}</td>
                                 <td style={{ color: 'var(--danger)', fontWeight: 600 }}>Rs. {(+item.amount).toLocaleString()}</td>
                               </tr>
                             ))}

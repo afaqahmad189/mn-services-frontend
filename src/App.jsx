@@ -16,6 +16,7 @@ import UsersPage from './pages/UsersPage';
 import AuditLogsPage from './pages/AuditLogsPage';
 import VendorsPage from './pages/VendorsPage';
 import LedgerPage from './pages/Ledger';
+import VendorLedgerPage from './pages/VendorLedger';
 import SettingsPage from './pages/SettingsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { useParams } from 'react-router-dom';
@@ -60,6 +61,7 @@ function AppRoutes() {
         <Route path="users" element={<UsersPage />} />
         <Route path="audit-logs" element={<AuditLogsPage />} />
         <Route path="ledger" element={<LedgerPage />} />
+        <Route path="vendor-ledger" element={<VendorLedgerPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
