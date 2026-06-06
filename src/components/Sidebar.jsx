@@ -3,30 +3,44 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
-  { section: 'Main', items: [
-    { path: '/', icon: '📊', label: 'Dashboard' },
-  ]},
-  { section: 'Cases', items: [
-    { path: '/invoices', icon: '📄', label: 'Invoice / Cases' },
-    { path: '/customers', icon: '👥', label: 'Customers' },
-    { path: '/ledger', icon: '📒', label: 'Customer Ledger' },
-    { path: '/vendor-ledger', icon: '📔', label: 'Vendor Ledger' },
-  ]},
-  { section: 'Tracking', items: [
-    { path: '/vendors', icon: '🏢', label: 'Vendors / Offices' },
-  ]},
-  { section: 'Finance', items: [
-    { path: '/expenses', icon: '💸', label: 'Daily Expenses' },
-    { path: '/reports', icon: '📈', label: 'Reports' },
-  ]},
-  { section: 'Communication', items: [
-    { path: '/whatsapp', icon: '💬', label: 'WhatsApp Templates' },
-  ]},
-  { section: 'Admin', items: [
-    { path: '/users', icon: '👤', label: 'User Management' },
-    { path: '/audit-logs', icon: '🔍', label: 'Audit Logs' },
-    { path: '/settings', icon: '⚙️', label: 'Settings' },
-  ]},
+  {
+    section: 'Main', items: [
+      { path: '/', icon: '📊', label: 'Dashboard' },
+    ]
+  },
+  {
+    section: 'Cases', items: [
+      { path: '/invoices', icon: '📄', label: 'Invoice / Cases' },
+      { path: '/customers', icon: '👥', label: 'Customers' },
+      { path: '/ledger', icon: '📒', label: 'Customer Ledger' },
+      { path: '/vendor-ledger', icon: '📔', label: 'Vendor Ledger' },
+    ]
+  },
+  {
+    section: 'Tracking', items: [
+      { path: '/vendors', icon: '🏢', label: 'Vendors / Offices' },
+    ]
+  },
+  {
+    section: 'Finance', items: [
+      { path: '/expenses', icon: '💸', label: 'Daily Expenses' },
+      { path: '/reports', icon: '📈', label: 'Reports' },
+    ]
+  },
+  {
+    section: 'Communication', items: [
+      { path: '/whatsapp', icon: '💬', label: 'WhatsApp Templates' },
+    ]
+  },
+  {
+    section: 'Admin', items: [
+      { path: '/users', icon: '👤', label: 'User Management' },
+      { path: '/forms', icon: '📝', label: 'Forms' },
+      { path: '/cars', icon: '🚗', label: 'Cars' },
+      { path: '/audit-logs', icon: '🔍', label: 'Audit Logs' },
+      { path: '/settings', icon: '⚙️', label: 'Settings' },
+    ]
+  },
 ];
 
 export default function Sidebar({ stats }) {
@@ -57,7 +71,7 @@ export default function Sidebar({ stats }) {
           const userRoles = user.roles?.map(r => r.toUpperCase()) || [];
           const isAdmin = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
           if (section.section === 'Admin' && !isAdmin) return null;
-          
+
           return (
             <div key={section.section}>
               <div className="nav-section-label">{section.section}</div>

@@ -20,6 +20,9 @@ import VendorLedgerPage from './pages/VendorLedger';
 import SettingsPage from './pages/SettingsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { useParams } from 'react-router-dom';
+import FormsPage from './pages/FormsPage';
+import PdfViewerPage from './pages/PdfViewerPage';
+import CarsPage from './pages/CarsPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -59,6 +62,9 @@ function AppRoutes() {
         <Route path="reports" element={<ReportsPage />} />
         <Route path="whatsapp" element={<WhatsAppPage />} />
         <Route path="users" element={<UsersPage />} />
+        <Route path="forms" element={<FormsPage />} />
+        <Route path="/pdf/:formType" element={<PdfViewerPage />} />
+        <Route path="cars" element={<CarsPage />} />
         <Route path="audit-logs" element={<AuditLogsPage />} />
         <Route path="ledger" element={<LedgerPage />} />
         <Route path="vendor-ledger" element={<VendorLedgerPage />} />
