@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
@@ -23,6 +24,9 @@ import { useParams } from 'react-router-dom';
 import FormsPage from './pages/FormsPage';
 import PdfViewerPage from './pages/PdfViewerPage';
 import CarsPage from './pages/CarsPage';
+import QuotationPage from './pages/quotation';
+import QuotationPreviewPage from './pages/quotationPreview';
+import QuotationListPage from './pages/QuotationListPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -51,6 +55,9 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
+        <Route path="quotations" element={<QuotationPage />} />
+        <Route path="quotations/list" element={<QuotationListPage />} />
+        <Route path="quotation/preview" element={<QuotationPreviewPage />} />
         <Route path="invoices" element={<InvoiceListPage />} />
         <Route path="invoices/new" element={<InvoiceFormPage />} />
         <Route path="invoices/:id" element={<InvoiceDetailPage />} />
@@ -80,6 +87,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
+        <Toaster position="top-right" />
       </BrowserRouter>
     </AuthProvider>
   );
