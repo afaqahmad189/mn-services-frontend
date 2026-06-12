@@ -9,6 +9,7 @@ const emptyForm = {
   registrationDate: new Date().toISOString().split('T')[0], cnic: '', address: '',
   challanAmount: 0, challanPaidByOfficeOrVendor: 'OFFICE', serviceCharges: 0, inspectionCharges: 0,
   additionalCharges: 0, discount: 0, amountReceived: 0, remarks: '',
+  status: 'DRAFT', hasSmartCard: true, hasNumberPlate: true, hasFile: true,
 };
 
 const Field = ({ label, field, type = 'text', required, children, colSpan, form, onChange }) => (
@@ -186,8 +187,39 @@ export default function InvoiceFormPage({ editId }) {
           </div>
 
           <div className="card mb-6">
-            <div className="form-group">
-              <label className="form-label">Remarks / Status</label>
+            <div className="card-header">
+              <div className="card-title">⚙️ Tracking & Status Options</div>
+            </div>
+            <div className="form-grid-3">
+              <Field label="Status" field="status" form={form} onChange={set}>
+                <select className="form-control" value={form.status || 'DRAFT'} onChange={set('status')}>
+                  <option value="DRAFT">Draft</option>
+                  <option value="ACTIVE">In Progress</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+              </Field>
+              <Field label="Includes Smart Card?" field="hasSmartCard" form={form} onChange={() => {}}>
+                <select className="form-control" value={form.hasSmartCard !== false ? 'true' : 'false'} onChange={(e) => setForm(f => ({ ...f, hasSmartCard: e.target.value === 'true' }))}>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </Field>
+              <Field label="Includes Number Plate?" field="hasNumberPlate" form={form} onChange={() => {}}>
+                <select className="form-control" value={form.hasNumberPlate !== false ? 'true' : 'false'} onChange={(e) => setForm(f => ({ ...f, hasNumberPlate: e.target.value === 'true' }))}>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </Field>
+              <Field label="Includes File?" field="hasFile" form={form} onChange={() => {}}>
+                <select className="form-control" value={form.hasFile !== false ? 'true' : 'false'} onChange={(e) => setForm(f => ({ ...f, hasFile: e.target.value === 'true' }))}>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </Field>
+            </div>
+            <div className="form-group" style={{ marginTop: '16px' }}>
+              <label className="form-label">Remarks</label>
               <textarea className="form-control" rows={3} value={form.remarks || ''} onChange={set('remarks')} placeholder="Any additional notes..." />
             </div>
           </div>

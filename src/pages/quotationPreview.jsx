@@ -157,131 +157,146 @@ export default function QuotationPreview() {
         </button>
       </div>
 
-      <div className="quotation-bill" id="quotation-print" style={{ backgroundImage: "url('/letter-pad.jpeg')" }}>
-        <header className="bill-header">
-          <h1 className="bill-company">M.N. SERVICES</h1>
-          <p className="bill-tagline">
-            We Deals In All Kind Of Motor Vehicles Registrations In All Over The Pakistan, NTN - 3220154-7
-          </p>
-          <h2 className="bill-title">QUOTATION</h2>
-        </header>
+      <div style={{ overflowX: 'auto', width: '100%', paddingBottom: '20px' }}>
+        <div className="quotation-bill" id="quotation-print" style={{
+          backgroundImage: "url('/letter-pad.jpeg')",
+          backgroundSize: '166% 104%',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          WebkitPrintColorAdjust: 'exact',
+          printColorAdjust: 'exact',
+          width: '210mm',
+          minHeight: '297mm',
+          paddingTop: '180px',
+          paddingBottom: '120px',
+          margin: '0 auto',
+          boxSizing: 'border-box'
+        }}>
+          <header className="bill-header" style={{ display: 'none' }}>
+            <h1 className="bill-company">M.N. SERVICES</h1>
+            <p className="bill-tagline">
+              We Deals In All Kind Of Motor Vehicles Registrations In All Over The Pakistan, NTN - 3220154-7
+            </p>
+            <h2 className="bill-title">QUOTATION</h2>
+          </header>
 
-        <div className="bill-info-box">
-          <div className="bill-info-row">
-            <span className="bill-info-label">DATED:</span>
-            <span>{formatDate(form.dated)}</span>
-            {quotationNumber && (
-              <>
-                <span className="bill-info-label" style={{ marginLeft: 24 }}>QUOTATION NO:</span>
-                <span>{quotationNumber}</span>
-              </>
-            )}
+          <div className="bill-info-box">
+            <div className="bill-info-row">
+              <span className="bill-info-label">DATED:</span>
+              <span>{formatDate(form.dated)}</span>
+              {quotationNumber && (
+                <>
+                  <span className="bill-info-label" style={{ marginLeft: 24 }}>QUOTATION NO:</span>
+                  <span>{quotationNumber}</span>
+                </>
+              )}
+            </div>
+            <div className="bill-info-row">
+              <span className="bill-info-label">Customer Name:</span>
+              <span className="bill-info-value">{form.customerName}</span>
+            </div>
+            <div className="bill-info-row">
+              <span className="bill-info-label">Contract No:</span>
+              <span>{form.contractNo || "-"}</span>
+            </div>
+            <div className="bill-info-row">
+              <span className="bill-info-label">VEHICLE TYPE &amp; INVOICE VALUE:</span>
+              <span>{vehicleInfo} — Rs. {invoiceValue}</span>
+            </div>
+            <div className="bill-info-row bill-reg-row">
+              <span className="bill-info-label">REGISTRATION NO.:</span>
+              <span>{form.registrationNo || "-"}</span>
+            </div>
+            <div className="bill-info-row bill-reg-row">
+              <span className="bill-info-label">SPECIAL NO.:</span>
+              <span>{form.specialNo || "-"}</span>
+            </div>
           </div>
-          <div className="bill-info-row">
-            <span className="bill-info-label">Customer Name:</span>
-            <span className="bill-info-value">{form.customerName}</span>
-          </div>
-          <div className="bill-info-row">
-            <span className="bill-info-label">Contract No:</span>
-            <span>{form.contractNo || "-"}</span>
-          </div>
-          <div className="bill-info-row">
-            <span className="bill-info-label">VEHICLE TYPE &amp; INVOICE VALUE:</span>
-            <span>{vehicleInfo} — Rs. {invoiceValue}</span>
-          </div>
-          <div className="bill-info-row bill-reg-row">
-            <span className="bill-info-label">REGISTRATION NO.:</span>
-            <span>{form.registrationNo || "-"}</span>
-          </div>
-          <div className="bill-info-row bill-reg-row">
-            <span className="bill-info-label">SPECIAL NO.:</span>
-            <span>{form.specialNo || "-"}</span>
-          </div>
-        </div>
 
-        <table className="bill-table">
-          <thead>
-            <tr>
-              <th className="bill-col-sr">SR. NO.</th>
-              <th className="bill-col-desc">DESCRIPTION</th>
-              {showPunjab && <th className="bill-col-amt">PUNJAB (VALUE)</th>}
-              {showIslamabad && <th className="bill-col-amt">ISLAMABAD (VALUE)</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(CHALLAN_LABELS).map(([key, label], index) => (
-              <tr key={key}>
-                <td className="bill-col-sr">{index + 1}</td>
-                <td className="bill-col-desc">{label}</td>
-                {showPunjab && (
-                  <td className="bill-col-amt">
-                    <AmountCell
-                      value={data.challan[key]?.punjab}
-                      onChange={(e) => updateChallan(key, "punjab", e.target.value)}
-                    />
-                  </td>
-                )}
-                {showIslamabad && (
-                  <td className="bill-col-amt">
-                    <AmountCell
-                      value={data.challan[key]?.islamabad}
-                      onChange={(e) => updateChallan(key, "islamabad", e.target.value)}
-                    />
-                  </td>
-                )}
+          <table className="bill-table" style={{ background: "none" }}>
+            <thead>
+              <tr>
+                <th className="bill-col-sr">SR. NO.</th>
+                <th className="bill-col-desc">DESCRIPTION</th>
+                {showPunjab && <th className="bill-col-amt">PUNJAB (VALUE)</th>}
+                {showIslamabad && <th className="bill-col-amt">ISLAMABAD (VALUE)</th>}
               </tr>
-            ))}
-            <tr className="bill-total-row">
-              <td />
-              <td><strong>TOTAL CHALLAN AMOUNT</strong></td>
-              {showPunjab && <td className="bill-col-amt"><strong>{formatAmount(challanPunjabTotal)}</strong></td>}
-              {showIslamabad && <td className="bill-col-amt"><strong>{formatAmount(challanIslamabadTotal)}</strong></td>}
-            </tr>
-
-            {Object.entries(SERVICE_LABELS).map(([key, label], index) => (
-              <tr key={key}>
-                <td className="bill-col-sr">{index + 1}</td>
-                <td className="bill-col-desc">{label || "\u00A0"}</td>
-                {showPunjab && (
-                  <td className="bill-col-amt">
-                    <AmountCell
-                      value={data.services[key]?.punjab}
-                      onChange={(e) => updateService(key, "punjab", e.target.value)}
-                    />
-                  </td>
-                )}
-                {showIslamabad && (
-                  <td className="bill-col-amt">
-                    <AmountCell
-                      value={data.services[key]?.islamabad}
-                      onChange={(e) => updateService(key, "islamabad", e.target.value)}
-                    />
-                  </td>
-                )}
+            </thead>
+            <tbody>
+              {Object.entries(CHALLAN_LABELS).map(([key, label], index) => (
+                <tr key={key}>
+                  <td className="bill-col-sr">{index + 1}</td>
+                  <td className="bill-col-desc">{label}</td>
+                  {showPunjab && (
+                    <td className="bill-col-amt">
+                      <AmountCell
+                        value={data.challan[key]?.punjab}
+                        onChange={(e) => updateChallan(key, "punjab", e.target.value)}
+                      />
+                    </td>
+                  )}
+                  {showIslamabad && (
+                    <td className="bill-col-amt">
+                      <AmountCell
+                        value={data.challan[key]?.islamabad}
+                        onChange={(e) => updateChallan(key, "islamabad", e.target.value)}
+                      />
+                    </td>
+                  )}
+                </tr>
+              ))}
+              <tr className="bill-total-row">
+                <td />
+                <td><strong>TOTAL CHALLAN AMOUNT</strong></td>
+                {showPunjab && <td className="bill-col-amt"><strong>{formatAmount(challanPunjabTotal)}</strong></td>}
+                {showIslamabad && <td className="bill-col-amt"><strong>{formatAmount(challanIslamabadTotal)}</strong></td>}
               </tr>
-            ))}
-            <tr className="bill-grand-row">
-              <td />
-              <td><strong>GRAND TOTAL</strong></td>
-              {showPunjab && <td className="bill-col-amt"><strong>{formatAmount(grandPunjabTotal)}</strong></td>}
-              {showIslamabad && <td className="bill-col-amt"><strong>{formatAmount(grandIslamabadTotal)}</strong></td>}
-            </tr>
-          </tbody>
-        </table>
 
-        <div className="bill-signature">
-          <em><strong>FOR M.N. SERVICES</strong></em>
-          <p className="text-danger">
-            <strong>Note:</strong> This quotation is provided for estimation purposes only. Final pricing may vary based on project requirements, scope changes, and market conditions.
-          </p>
+              {Object.entries(SERVICE_LABELS).map(([key, label], index) => (
+                <tr key={key}>
+                  <td className="bill-col-sr">{index + 1}</td>
+                  <td className="bill-col-desc">{label || "\u00A0"}</td>
+                  {showPunjab && (
+                    <td className="bill-col-amt">
+                      <AmountCell
+                        value={data.services[key]?.punjab}
+                        onChange={(e) => updateService(key, "punjab", e.target.value)}
+                      />
+                    </td>
+                  )}
+                  {showIslamabad && (
+                    <td className="bill-col-amt">
+                      <AmountCell
+                        value={data.services[key]?.islamabad}
+                        onChange={(e) => updateService(key, "islamabad", e.target.value)}
+                      />
+                    </td>
+                  )}
+                </tr>
+              ))}
+              <tr className="bill-grand-row">
+                <td />
+                <td><strong>GRAND TOTAL</strong></td>
+                {showPunjab && <td className="bill-col-amt"><strong>{formatAmount(grandPunjabTotal)}</strong></td>}
+                {showIslamabad && <td className="bill-col-amt"><strong>{formatAmount(grandIslamabadTotal)}</strong></td>}
+              </tr>
+            </tbody>
+          </table>
+
+          <div className="bill-signature">
+            <em><strong>FOR M.N. SERVICES</strong></em>
+            <p className="text-danger">
+              <strong>Note:</strong> This quotation is provided for estimation purposes only. Final pricing may vary based on project requirements, scope changes, and market conditions.
+            </p>
+          </div>
+
+          <footer className="bill-footer" style={{ display: 'none' }}>
+            OFFICE NO C-816, BILAL ROAD, NEAR EXCISE &amp; TAXATION OFFICE, FAISALABAD.
+            <br></br>
+            <span>For Contact: 041-2648555</span>
+          </footer>
         </div>
-
-        <footer className="bill-footer">
-          OFFICE NO C-816, BILAL ROAD, NEAR EXCISE &amp; TAXATION OFFICE, FAISALABAD.
-          <br></br>
-          <span>For Contact: 041-2648555</span>
-        </footer>
       </div>
-    </div>
+    </div >
   );
 }

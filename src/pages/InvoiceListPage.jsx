@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../context/AuthContext';
 
 const STATUS_BADGE = {
@@ -20,7 +20,10 @@ export default function InvoiceListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialStatus = queryParams.get('status') || '';
+  const [status, setStatus] = useState(initialStatus);
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -66,6 +69,7 @@ export default function InvoiceListPage() {
           </div>
           <select className="form-control" style={{ width: '180px' }} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
             <option value="">All Statuses</option>
+            <option value="DRAFT">Draft</option>
             <option value="ACTIVE">Active</option>
             <option value="COMPLETED">Completed</option>
             <option value="CANCELLED">Cancelled</option>

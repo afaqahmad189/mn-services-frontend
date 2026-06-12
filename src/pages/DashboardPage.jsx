@@ -35,7 +35,7 @@ export default function DashboardPage() {
     <div className="page-content">
       {/* Skeleton Stat Grid */}
       <div className="stat-grid mb-6">
-        {[1,2,3,4,5,6,7,8].map(i => (
+        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
           <div key={i} className="stat-card">
             <div className="skeleton" style={{ width: '48px', height: '48px', borderRadius: '12px' }} />
             <div style={{ flex: 1 }}>
@@ -49,13 +49,13 @@ export default function DashboardPage() {
       <div className="grid-2 gap-6">
         <div className="card">
           <div className="skeleton skeleton-title" />
-          {[1,2,3,4,5].map(i => (
+          {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="skeleton" style={{ height: '60px', marginBottom: '12px', borderRadius: '8px' }} />
           ))}
         </div>
         <div className="card">
           <div className="skeleton skeleton-title" />
-          {[1,2,3,4,5,6,7,8].map(i => (
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
             <div key={i} className="skeleton-row skeleton" style={{ height: '45px' }} />
           ))}
         </div>
@@ -65,8 +65,9 @@ export default function DashboardPage() {
 
   const statCards = [
     { icon: '📄', label: 'Total Cases', value: stats?.total || 0, cls: 'blue' },
-    { icon: '🔄', label: 'Active Cases', value: stats?.active || 0, cls: 'blue' },
-    { icon: '✅', label: 'Completed', value: stats?.completed || 0, cls: 'green' },
+    { icon: '📝', label: 'Draft Cases', value: stats?.draft || 0, cls: 'blue', query: '?status=DRAFT' },
+    { icon: '🔄', label: 'Active Cases', value: stats?.active || 0, cls: 'blue', query: '?status=ACTIVE' },
+    { icon: '✅', label: 'Completed', value: stats?.completed || 0, cls: 'green', query: '?status=COMPLETED' },
     { icon: '⚠️', label: 'Vendor Delays', value: stats?.delayedByVendor || 0, cls: 'orange' },
     { icon: '💰', label: 'Pending Payments', value: stats?.pendingBalances || 0, cls: 'red' },
     { icon: '📋', label: 'Challan Pending', value: stats?.pendingChallan || 0, cls: 'orange' },
@@ -86,7 +87,7 @@ export default function DashboardPage() {
         {/* STAT CARDS */}
         <div className="stat-grid mb-6">
           {statCards.map(s => (
-            <div key={s.label} className="stat-card" onClick={() => navigate('/invoices')} style={{ cursor: 'pointer' }}>
+            <div key={s.label} className="stat-card" onClick={() => navigate(s.query ? `/invoices${s.query}` : '/invoices')} style={{ cursor: 'pointer' }}>
               <div className={`stat-icon ${s.cls}`}>{s.icon}</div>
               <div>
                 <div className="stat-value">{s.value}</div>
@@ -108,6 +109,7 @@ export default function DashboardPage() {
               </div>
 
               <div style={{ maxHeight: '550px', overflowY: 'auto', paddingRight: '8px' }}>
+
                 {/* DELAYED BY CUSTOMER */}
                 {delayed?.delayedByCustomer?.length > 0 && (
                   <>
@@ -117,7 +119,7 @@ export default function DashboardPage() {
                         <span>ℹ️</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Challan received but payment pending for {Math.floor((Date.now() - new Date(inv.challanReceivedDate))/86400000)} days</small>
+                          <small>Challan received but payment pending for {Math.floor((Date.now() - new Date(inv.challanReceivedDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -132,7 +134,7 @@ export default function DashboardPage() {
                         <span>⚠️</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Challan paid but biometric pending for {Math.floor((Date.now() - new Date(inv.challanPaidDate))/86400000)} days</small>
+                          <small>Challan paid but biometric pending for {Math.floor((Date.now() - new Date(inv.challanPaidDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -148,7 +150,7 @@ export default function DashboardPage() {
                         <span>⚠️</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Biometric done but plate pending for {Math.floor((Date.now() - new Date(inv.biometricDate))/86400000)} days</small>
+                          <small>Biometric done but plate pending for {Math.floor((Date.now() - new Date(inv.biometricDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -163,7 +165,7 @@ export default function DashboardPage() {
                         <span>🔔</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Plate received but customer not informed for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate))/86400000)} days</small>
+                          <small>Plate received but customer not informed for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -178,7 +180,7 @@ export default function DashboardPage() {
                         <span>⏳</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Customer informed but plate not collected for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate))/86400000)} days</small>
+                          <small>Customer informed but plate not collected for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -194,7 +196,7 @@ export default function DashboardPage() {
                         <span>ℹ️</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Inspection pending for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate))/86400000)} days</small>
+                          <small>Inspection pending for {Math.floor((Date.now() - new Date(inv.numberPlateReceivedDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -210,7 +212,7 @@ export default function DashboardPage() {
                         <span>⚠️</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Inspection done but file pending for {Math.floor((Date.now() - new Date(inv.inspectionPhysicalDate))/86400000)} days</small>
+                          <small>Inspection done but file pending for {Math.floor((Date.now() - new Date(inv.inspectionPhysicalDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -225,7 +227,7 @@ export default function DashboardPage() {
                         <span>📦</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>File received in office but not delivered for {Math.floor((Date.now() - new Date(inv.fileReceivedDate))/86400000)} days</small>
+                          <small>File received in office but not delivered for {Math.floor((Date.now() - new Date(inv.fileReceivedDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -240,7 +242,7 @@ export default function DashboardPage() {
                         <span>📁</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Smart card pending for {Math.floor((Date.now() - new Date(inv.createdAt))/86400000)} days</small>
+                          <small>Smart card pending for {Math.floor((Date.now() - new Date(inv.createdAt)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
@@ -255,7 +257,7 @@ export default function DashboardPage() {
                         <span>📩</span>
                         <div>
                           <strong>{inv.customer?.name}</strong> — {inv.invoiceNumber}<br />
-                          <small>Smart card received in office but not delivered for {Math.floor((Date.now() - new Date(inv.smartCardReceivedDate))/86400000)} days</small>
+                          <small>Smart card received in office but not delivered for {Math.floor((Date.now() - new Date(inv.smartCardReceivedDate)) / 86400000)} days</small>
                         </div>
                       </div>
                     ))}
