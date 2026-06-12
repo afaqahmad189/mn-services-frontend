@@ -40,6 +40,7 @@ export default function QuotationListPage() {
           carPrice: q.carPrice,
           customerType: q.customerType,
           state: q.state,
+          specialNo: q.specialNo
         },
         editId: q.id,
         quotationNumber: q.quotationNumber,
@@ -63,6 +64,7 @@ export default function QuotationListPage() {
           carPrice: q.carPrice,
           customerType: q.customerType,
           state: q.state,
+          specialNo: q.specialNo
         },
         editId: q.id,
         quotationNumber: q.quotationNumber,

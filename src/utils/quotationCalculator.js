@@ -85,7 +85,7 @@ export function calculateNewVehicleCharges(form) {
       },
       SmartCard: {
         punjab: state === 'Punjab' || state === 'Both' ? 1300 : 0,
-        islamabad: state === 'Islamabad' || state === 'Both' ? 2400 : 0,
+        islamabad: state === 'Islamabad' || state === 'Both' ? 1500 : 0,
       },
       AdvanceTax: distributeByState(state, 0),
       SpecialNoFee: distributeByState(state, 0),

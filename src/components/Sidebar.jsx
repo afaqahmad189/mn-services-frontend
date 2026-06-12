@@ -37,7 +37,6 @@ const navItems = [
     section: 'Admin', items: [
       { path: '/users', icon: '👤', label: 'User Management' },
       { path: '/forms', icon: '📝', label: 'Forms' },
-      { path: '/cars', icon: '🚗', label: 'Cars' },
       { path: '/audit-logs', icon: '🔍', label: 'Audit Logs' },
       { path: '/settings', icon: '⚙️', label: 'Settings' },
     ]

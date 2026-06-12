@@ -1,5 +1,5 @@
 export const CHALLAN_LABELS = {
-  TransferChallanAmount: 'Transfer Challan Amount',
+  TransferChallanAmount: 'Registration Fee',
   TokenTax: 'Token Tax',
   IncomeTax: 'Income Tax',
   ProfessionalTax: 'Professional Tax',
@@ -13,14 +13,17 @@ export const CHALLAN_LABELS = {
   LateFee: 'Late Fee',
   AdditionalRegistrationMarkFee: 'Additional Reg. Mark Fee',
   GovtFee: 'Govt Platform Charges',
+  OtherCharges: '',
+  OtherCharges2: '',
+  OtherCharges3: '',
 };
 
 export const SERVICE_LABELS = {
   PhysicalInspection: 'Physical Inspection',
-  SpecialNoFee172: 'Special No Fee (172)',
-  NoDemandCharges: 'No Demand Charges',
+  SpecialNoFee172: 'Special No Fee',
+  NoDemandCharges: 'Number Demand Charges',
   OlpRequestLetterFee: 'Olp Request Letter Fee',
-  PaidByEPayChoiceNo: 'Paid By E Pay For Choice No',
+  PaidByEPayChoiceNo: 'Documentation Charges',
   ServiceCharges: 'Service Charges',
   OtherCharges: '',
 };

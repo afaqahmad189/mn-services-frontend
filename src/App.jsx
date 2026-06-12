@@ -23,7 +23,6 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { useParams } from 'react-router-dom';
 import FormsPage from './pages/FormsPage';
 import PdfViewerPage from './pages/PdfViewerPage';
-import CarsPage from './pages/CarsPage';
 import QuotationPage from './pages/quotation';
 import QuotationPreviewPage from './pages/quotationPreview';
 import QuotationListPage from './pages/QuotationListPage';
@@ -71,7 +70,6 @@ function AppRoutes() {
         <Route path="users" element={<UsersPage />} />
         <Route path="forms" element={<FormsPage />} />
         <Route path="/pdf/:formType" element={<PdfViewerPage />} />
-        <Route path="cars" element={<CarsPage />} />
         <Route path="audit-logs" element={<AuditLogsPage />} />
         <Route path="ledger" element={<LedgerPage />} />
         <Route path="vendor-ledger" element={<VendorLedgerPage />} />

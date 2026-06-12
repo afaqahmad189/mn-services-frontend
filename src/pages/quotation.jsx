@@ -7,6 +7,7 @@ const defaultForm = {
   customerName: "",
   contractNo: "",
   registrationNo: "",
+  specialNo: "",
   cc: "1000",
   carPrice: "",
   maker: "",
@@ -113,6 +114,17 @@ export default function QuotationPage() {
                 className="form-control"
                 name="registrationNo"
                 value={form.registrationNo}
+                onChange={handleChange}
+                placeholder="e.g. FD-18-24"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Special No</label>
+              <input
+                className="form-control"
+                name="specialNo"
+                value={form.specialNo}
                 onChange={handleChange}
                 placeholder="e.g. FD-18-24"
               />

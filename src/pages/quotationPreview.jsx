@@ -91,6 +91,7 @@ export default function QuotationPreview() {
     const payload = {
       dated: form.dated || new Date().toISOString().slice(0, 10),
       customerName: form.customerName,
+      specialNo: form.specialNo || null,
       contractNo: form.contractNo || null,
       registrationNo: form.registrationNo || null,
       vehicleType: form.vehicleType,
@@ -138,6 +139,7 @@ export default function QuotationPreview() {
   const vehicleInfo = [form.maker, form.vehicleType].filter(Boolean).join(" - ");
   const invoiceValue = form.carPrice ? Number(form.carPrice).toLocaleString() : "-";
 
+
   return (
     <div className="quotation-page">
       <div className="no-print quotation-actions">
@@ -155,7 +157,7 @@ export default function QuotationPreview() {
         </button>
       </div>
 
-      <div className="quotation-bill" id="quotation-print">
+      <div className="quotation-bill" id="quotation-print" style={{ backgroundImage: "url('/letter-pad.jpeg')" }}>
         <header className="bill-header">
           <h1 className="bill-company">M.N. SERVICES</h1>
           <p className="bill-tagline">
@@ -189,7 +191,11 @@ export default function QuotationPreview() {
           </div>
           <div className="bill-info-row bill-reg-row">
             <span className="bill-info-label">REGISTRATION NO.:</span>
-            <span className="bill-reg-no">{form.registrationNo || "-"}</span>
+            <span>{form.registrationNo || "-"}</span>
+          </div>
+          <div className="bill-info-row bill-reg-row">
+            <span className="bill-info-label">SPECIAL NO.:</span>
+            <span>{form.specialNo || "-"}</span>
           </div>
         </div>
 
@@ -272,6 +278,8 @@ export default function QuotationPreview() {
 
         <footer className="bill-footer">
           OFFICE NO C-816, BILAL ROAD, NEAR EXCISE &amp; TAXATION OFFICE, FAISALABAD.
+          <br></br>
+          <span>For Contact: 041-2648555</span>
         </footer>
       </div>
     </div>
