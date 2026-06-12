@@ -22,10 +22,12 @@ import SettingsPage from './pages/SettingsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { useParams } from 'react-router-dom';
 import FormsPage from './pages/FormsPage';
+import FormFPage from './pages/FormFPage';
 import PdfViewerPage from './pages/PdfViewerPage';
 import QuotationPage from './pages/quotation';
 import QuotationPreviewPage from './pages/quotationPreview';
 import QuotationListPage from './pages/QuotationListPage';
+import FormToPage from './pages/FormToPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -69,7 +71,8 @@ function AppRoutes() {
         <Route path="whatsapp" element={<WhatsAppPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="forms" element={<FormsPage />} />
-        <Route path="/pdf/:formType" element={<PdfViewerPage />} />
+        <Route path="forms/f" element={<FormFPage />} />
+        <Route path="forms/to" element={<FormToPage />} />
         <Route path="audit-logs" element={<AuditLogsPage />} />
         <Route path="ledger" element={<LedgerPage />} />
         <Route path="vendor-ledger" element={<VendorLedgerPage />} />

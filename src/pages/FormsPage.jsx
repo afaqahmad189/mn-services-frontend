@@ -4,9 +4,9 @@ export default function FormsPage() {
   const navigate = useNavigate();
 
   const forms = [
-    { title: 'TO Form', path: '/pdf/to-form' },
-    { title: 'NTN Form', path: '/pdf/ntn-form' },
-    { title: 'F Form', path: '/pdf/f-form' }
+    { title: 'TO Form', path: '/forms/to' },
+    { title: 'NTN Form', path: '/' },
+    { title: 'F Form', path: '/forms/f' }
   ];
 
   return (
