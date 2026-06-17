@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5001/api/v1';
+const API_BASE = 'https://api.m-nservices.com/api/v1';
 
 const api = axios.create({ baseURL: API_BASE });
 api.interceptors.request.use((config) => {
@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    try { await api.post('/auth/logout'); } catch {}
+    try { await api.post('/auth/logout'); } catch { }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
