@@ -28,6 +28,7 @@ import QuotationPage from './pages/quotation';
 import QuotationPreviewPage from './pages/quotationPreview';
 import QuotationListPage from './pages/QuotationListPage';
 import FormToPage from './pages/FormToPage';
+import SmartCardFormPage from './pages/FormSmartCardPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -73,6 +74,7 @@ function AppRoutes() {
         <Route path="forms" element={<FormsPage />} />
         <Route path="forms/f" element={<FormFPage />} />
         <Route path="forms/to" element={<FormToPage />} />
+        <Route path="forms/smartcard" element={<SmartCardFormPage />} />
         <Route path="audit-logs" element={<AuditLogsPage />} />
         <Route path="ledger" element={<LedgerPage />} />
         <Route path="vendor-ledger" element={<VendorLedgerPage />} />
