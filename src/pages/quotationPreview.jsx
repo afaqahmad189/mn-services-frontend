@@ -166,9 +166,8 @@ export default function QuotationPreview() {
           WebkitPrintColorAdjust: 'exact',
           printColorAdjust: 'exact',
           width: '210mm',
-          minHeight: '297mm',
-          paddingTop: '180px',
-          paddingBottom: '120px',
+          paddingTop: '160px',
+          paddingBottom: '95px',
           margin: '0 auto',
           boxSizing: 'border-box'
         }}>
@@ -284,17 +283,10 @@ export default function QuotationPreview() {
           </table>
 
           <div className="bill-signature">
-            <em><strong>FOR M.N. SERVICES</strong></em>
             <p className="text-danger">
               <strong>Note:</strong> This quotation is provided for estimation purposes only. Final pricing may vary based on project requirements, scope changes, and market conditions.
             </p>
           </div>
-
-          <footer className="bill-footer" style={{ display: 'none' }}>
-            OFFICE NO C-816, BILAL ROAD, NEAR EXCISE &amp; TAXATION OFFICE, FAISALABAD.
-            <br></br>
-            <span>For Contact: 041-2648555</span>
-          </footer>
         </div>
       </div>
     </div >

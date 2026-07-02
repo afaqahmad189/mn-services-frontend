@@ -97,8 +97,10 @@ export function calculateVehicleCharges(form) {
   const tokenPb = calculateTokenTaxPb(cc, price);
   const incomePb = calculateIncomeTaxPb(cc, form.customerType);
   const profPb = 200;
-  const hpaPb = calculateHpaPb(cc);
-  const transferPb = calculateTransferFeePb(cc);
+  // const hpaPb = calculateHpaPb(cc);
+  // const transferPb = calculateTransferFeePb(cc);
+  const hpaPb = 0;
+  const transferPb = 0;
   const addlFeePb = calculateAdditionalRegFeePb(cc);
   const govtPlatformPb = 15;
 

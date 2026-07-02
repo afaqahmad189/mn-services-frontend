@@ -1189,6 +1189,12 @@ tbody td {
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 20px;
+  align-items: center;
+}
+
+.print-hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 .quotation-bill {
@@ -1229,9 +1235,10 @@ tbody td {
 
 .bill-info-box {
   border: 2px solid #000;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  margin-top: 35px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  margin-top: 25px;
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .bill-info-row {
@@ -1316,7 +1323,7 @@ tbody td {
 
 .bill-signature {
   text-align: right;
-  margin-top: 30px;
+  margin-top: 14px;
   font-size: 0.95rem;
 }
 
@@ -1339,16 +1346,64 @@ tbody td {
   margin: 40px auto;
 }
 
+.bill-table td,
+.bill-table th {
+  padding: 4px 8px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.bill-input {
+  height: 22px;
+  padding: 2px 4px;
+}
+
+.quotation-scroll-wrap {
+  overflow-x: auto;
+  width: 100%;
+  padding-bottom: 20px;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
 @media print {
-  .quotation-page {
-    padding: 0;
-    background: #fff;
+
+  body * {
+    visibility: hidden;
   }
 
-  .quotation-bill {
-    border: none;
-    padding: 20px;
-    max-width: 100%;
+  #quotation-print,
+  #quotation-print * {
+    visibility: visible;
+  }
+
+  .bill-table td,
+  .bill-table th {
+    padding: 1px 4px !important;
+    font-size: 9.5px !important;
+    line-height: 1.15 !important;
+  }
+
+  .bill-col-amt {
+    padding: 0 !important;
+  }
+
+  .bill-row-blank {
+    display: none !important;
+  }
+
+  .bill-signature {
+    margin-top: 4px !important;
+    font-size: 8px !important;
+    line-height: 1.25 !important;
+    text-align: left !important;
+  }
+
+  .bill-signature p {
+    margin: 0 !important;
   }
 
   .bill-input-edit {
@@ -1357,5 +1412,13 @@ tbody td {
 
   .bill-amount-print {
     display: inline !important;
+  }
+
+  .bill-input {
+    height: 18px;
+    padding: 0 !important;
+    font-size: 9.5px !important;
+    border: none;
+    background: transparent !important;
   }
 }
