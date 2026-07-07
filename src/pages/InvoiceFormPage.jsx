@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import SearchableSelect from '../components/SearchableSelect';
 
 const emptyForm = {
   customerId: '', vendorId: '', registrationNo: '', newRegistrationNo: '',
@@ -23,6 +25,7 @@ const Field = ({ label, field, type = 'text', required, children, colSpan, form,
 
 export default function InvoiceFormPage({ editId }) {
   const navigate = useNavigate();
+  const { can } = useAuth();
   const [form, setForm] = useState(emptyForm);
   const [customers, setCustomers] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -33,7 +36,7 @@ export default function InvoiceFormPage({ editId }) {
 
   useEffect(() => {
     Promise.all([
-      api.get('/customers', { params: { limit: 200 } }),
+      api.get('/customers', { params: { limit: 500 } }),
       api.get('/vendors'),
     ]).then(([c, v]) => {
       setCustomers(c.data.data || []);
@@ -58,11 +61,12 @@ export default function InvoiceFormPage({ editId }) {
   const remainingBalance = totalAmount - (+form.amountReceived || 0);
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+  const setVal = (field) => (value) => setForm(f => ({ ...f, [field]: value }));
 
   const handleSaveCustomer = async () => {
     const { data } = await api.post('/customers', newCustomer);
     setCustomers(c => [...c, data]);
-    setForm(f => ({ ...f, customerId: data.id }));
+    setForm(f => ({ ...f, customerId: String(data.id) }));
     setShowNewCustomer(false);
     setNewCustomer({ name: '', phone: '', cnic: '', email: '' });
   };
@@ -81,6 +85,27 @@ export default function InvoiceFormPage({ editId }) {
       navigate(`/invoices/${editId}`);
     } finally { setSaving(false); }
   };
+
+  // Build options for searchable selects
+  const customerOptions = customers.map(c => ({ value: String(c.id), label: `${c.name} — ${c.phone}` }));
+  const vendorOptions = vendors.map(v => ({ value: String(v.id), label: `${v.name} — ${v.city}` }));
+
+  const statusOptions = [
+    { value: 'DRAFT', label: 'Draft' },
+    { value: 'ACTIVE', label: 'In Progress' },
+    { value: 'COMPLETED', label: 'Completed' },
+    { value: 'CANCELLED', label: 'Cancelled' },
+  ];
+
+  const challanPaidOptions = [
+    { value: 'OFFICE', label: 'Our Office (Self)' },
+    { value: 'VENDOR', label: 'Excise Office / Vendor' },
+  ];
+
+  const yesNoOptions = [
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
+  ];
 
   if (loading) return (
     <div className="page-content">
@@ -121,18 +146,22 @@ export default function InvoiceFormPage({ editId }) {
             <div className="form-grid">
               <Field label="Customer" field="customerId" required form={form} onChange={set}>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <select className="form-control" value={form.customerId} onChange={set('customerId')} required>
-                    <option value="">Select Customer...</option>
-                    {customers.map(c => <option key={c.id} value={c.id}>{c.name} — {c.phone}</option>)}
-                  </select>
+                  <SearchableSelect
+                    options={customerOptions}
+                    value={String(form.customerId)}
+                    onChange={setVal('customerId')}
+                    placeholder="Search customer..."
+                  />
                   <button type="button" className="btn btn-outline btn-sm" style={{ whiteSpace: 'nowrap' }} onClick={() => setShowNewCustomer(true)}>+ New</button>
                 </div>
               </Field>
               <Field label="Excise Office / Vendor" field="vendorId" form={form} onChange={set}>
-                <select className="form-control" value={form.vendorId} onChange={set('vendorId')}>
-                  <option value="">Select Office...</option>
-                  {vendors.map(v => <option key={v.id} value={v.id}>{v.name} — {v.city}</option>)}
-                </select>
+                <SearchableSelect
+                  options={[{ value: '', label: 'None' }, ...vendorOptions]}
+                  value={String(form.vendorId)}
+                  onChange={setVal('vendorId')}
+                  placeholder="Search office..."
+                />
               </Field>
               <Field label="Registration No." field="registrationNo" form={form} onChange={set} />
               <Field label="New Registration No." field="newRegistrationNo" form={form} onChange={set} />
@@ -159,14 +188,16 @@ export default function InvoiceFormPage({ editId }) {
             <div className="form-grid-3">
               <Field label="Challan Amount (Rs.)" field="challanAmount" type="number" form={form} onChange={set} />
               <Field label="Challan Paid By" field="challanPaidByOfficeOrVendor" form={form} onChange={set}>
-                <select className="form-control" value={form.challanPaidByOfficeOrVendor || 'OFFICE'} onChange={set('challanPaidByOfficeOrVendor')}>
-                  <option value="OFFICE">Our Office (Self)</option>
-                  <option value="VENDOR">Excise Office / Vendor</option>
-                </select>
+                <SearchableSelect
+                  options={challanPaidOptions}
+                  value={form.challanPaidByOfficeOrVendor || 'OFFICE'}
+                  onChange={setVal('challanPaidByOfficeOrVendor')}
+                  placeholder="Select..."
+                />
               </Field>
               <Field label="Service Charges (Rs.)" field="serviceCharges" type="number" form={form} onChange={set} />
               <Field label="Inspection Charges (Rs.)" field="inspectionCharges" type="number" form={form} onChange={set} />
-              <Field label="Additional Charges (Rs.)" field="additionalCharges" type="number" form={form} onChange={set} />
+              <Field label="Vendor Charges (Rs.)" field="additionalCharges" type="number" form={form} onChange={set} />
               <Field label="Discount (Rs.)" field="discount" type="number" form={form} onChange={set} />
               <Field label="Amount Received (Rs.)" field="amountReceived" type="number" form={form} onChange={set} />
             </div>
@@ -188,34 +219,40 @@ export default function InvoiceFormPage({ editId }) {
 
           <div className="card mb-6">
             <div className="card-header">
-              <div className="card-title">⚙️ Tracking & Status Options</div>
+              <div className="card-title">⚙️ Tracking &amp; Status Options</div>
             </div>
             <div className="form-grid-3">
               <Field label="Status" field="status" form={form} onChange={set}>
-                <select className="form-control" value={form.status || 'DRAFT'} onChange={set('status')}>
-                  <option value="DRAFT">Draft</option>
-                  <option value="ACTIVE">In Progress</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
+                <SearchableSelect
+                  options={statusOptions}
+                  value={form.status || 'DRAFT'}
+                  onChange={setVal('status')}
+                  placeholder="Select status..."
+                />
               </Field>
-              <Field label="Includes Smart Card?" field="hasSmartCard" form={form} onChange={() => {}}>
-                <select className="form-control" value={form.hasSmartCard !== false ? 'true' : 'false'} onChange={(e) => setForm(f => ({ ...f, hasSmartCard: e.target.value === 'true' }))}>
-                  <option value="true">Yes</option>
-                  <option value="false">No</option>
-                </select>
+              <Field label="Includes Smart Card?" field="hasSmartCard" form={form} onChange={() => { }}>
+                <SearchableSelect
+                  options={yesNoOptions}
+                  value={form.hasSmartCard !== false ? 'true' : 'false'}
+                  onChange={(v) => setForm(f => ({ ...f, hasSmartCard: v === 'true' }))}
+                  placeholder="Select..."
+                />
               </Field>
-              <Field label="Includes Number Plate?" field="hasNumberPlate" form={form} onChange={() => {}}>
-                <select className="form-control" value={form.hasNumberPlate !== false ? 'true' : 'false'} onChange={(e) => setForm(f => ({ ...f, hasNumberPlate: e.target.value === 'true' }))}>
-                  <option value="true">Yes</option>
-                  <option value="false">No</option>
-                </select>
+              <Field label="Includes Number Plate?" field="hasNumberPlate" form={form} onChange={() => { }}>
+                <SearchableSelect
+                  options={yesNoOptions}
+                  value={form.hasNumberPlate !== false ? 'true' : 'false'}
+                  onChange={(v) => setForm(f => ({ ...f, hasNumberPlate: v === 'true' }))}
+                  placeholder="Select..."
+                />
               </Field>
-              <Field label="Includes File?" field="hasFile" form={form} onChange={() => {}}>
-                <select className="form-control" value={form.hasFile !== false ? 'true' : 'false'} onChange={(e) => setForm(f => ({ ...f, hasFile: e.target.value === 'true' }))}>
-                  <option value="true">Yes</option>
-                  <option value="false">No</option>
-                </select>
+              <Field label="Includes File?" field="hasFile" form={form} onChange={() => { }}>
+                <SearchableSelect
+                  options={yesNoOptions}
+                  value={form.hasFile !== false ? 'true' : 'false'}
+                  onChange={(v) => setForm(f => ({ ...f, hasFile: v === 'true' }))}
+                  placeholder="Select..."
+                />
               </Field>
             </div>
             <div className="form-group" style={{ marginTop: '16px' }}>

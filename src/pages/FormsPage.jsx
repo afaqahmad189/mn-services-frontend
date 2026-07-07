@@ -5,7 +5,7 @@ export default function FormsPage() {
 
   const forms = [
     { title: 'TO Form', path: '/forms/to' },
-    { title: 'NTN Form', path: '/' },
+    { title: 'NTN Form', path: '/forms/ntn' },
     { title: 'F Form', path: '/forms/f' },
     { title: 'Smartcard Form', path: '/forms/smartcard' }
   ];

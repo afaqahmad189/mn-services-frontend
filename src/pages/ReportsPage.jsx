@@ -69,7 +69,7 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <div style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: '#fff', padding: '24px' }}>
+      <div className='toptab' style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: '#fff', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div><h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>📊 Reports</h1><p style={{ opacity: 0.8, fontSize: '0.875rem' }}>Analytics & operational insights</p></div>
           {hasPermission('report:print') && (

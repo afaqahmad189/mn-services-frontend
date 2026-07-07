@@ -2,9 +2,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { api } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function QuotationListPage() {
   const navigate = useNavigate();
+  const { can } = useAuth();
   const [quotations, setQuotations] = useState([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
@@ -40,7 +42,8 @@ export default function QuotationListPage() {
           carPrice: q.carPrice,
           customerType: q.customerType,
           state: q.state,
-          specialNo: q.specialNo
+          specialNo: q.specialNo,
+          type: q.type,
         },
         editId: q.id,
         quotationNumber: q.quotationNumber,
@@ -64,7 +67,8 @@ export default function QuotationListPage() {
           carPrice: q.carPrice,
           customerType: q.customerType,
           state: q.state,
-          specialNo: q.specialNo
+          specialNo: q.specialNo,
+          type: q.type,
         },
         editId: q.id,
         quotationNumber: q.quotationNumber,
@@ -88,18 +92,20 @@ export default function QuotationListPage() {
   return (
     <div>
       <div style={{ background: "linear-gradient(135deg, var(--primary-dark), var(--primary))", color: "#fff", padding: "24px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
           <div>
             <h1 style={{ fontSize: "1.5rem", fontWeight: 700 }}>📄 Quotations</h1>
             <p style={{ opacity: 0.8, fontSize: "0.875rem" }}>{total} saved quotations</p>
           </div>
-          <button
-            className="btn"
-            style={{ background: "#fff", color: "var(--primary)", fontWeight: 600 }}
-            onClick={() => navigate("/quotations")}
-          >
-            + New Quotation
-          </button>
+          {can('create') && (
+            <button
+              className="btn"
+              style={{ background: "#fff", color: "var(--primary)", fontWeight: 600 }}
+              onClick={() => navigate("/quotations")}
+            >
+              + New Quotation
+            </button>
+          )}
         </div>
       </div>
 
@@ -156,10 +162,14 @@ export default function QuotationListPage() {
                       <td>{Number(q.grandTotalPunjab).toLocaleString()}</td>
                       <td>{Number(q.grandTotalIslamabad).toLocaleString()}</td>
                       <td>
-                        <div style={{ display: "flex", gap: 6 }}>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                           <button className="btn btn-outline btn-sm" onClick={() => openQuotation(q)}>View</button>
-                          <button className="btn btn-outline btn-sm" onClick={() => editQuotation(q)}>Edit</button>
-                          <button className="btn btn-outline btn-sm" onClick={() => deleteQuotation(q.id)}>Delete</button>
+                          {can('edit') && (
+                            <button className="btn btn-outline btn-sm" onClick={() => editQuotation(q)}>Edit</button>
+                          )}
+                          {can('edit') && (
+                            <button className="btn btn-outline btn-sm" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => deleteQuotation(q.id)}>Delete</button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -169,6 +179,15 @@ export default function QuotationListPage() {
             </table>
           </div>
         </div>
+
+        {/* Pagination */}
+        {total > 20 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
+            <button className="btn btn-outline btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>← Prev</button>
+            <span style={{ padding: '6px 12px', fontSize: '0.875rem', color: 'var(--primary)', fontWeight: 600 }} >Page {page}</span>
+            <button className="btn btn-outline btn-sm" onClick={() => setPage(p => p + 1)} disabled={quotations.length < 20}>Next →</button>
+          </div>
+        )}
       </div>
     </div>
   );

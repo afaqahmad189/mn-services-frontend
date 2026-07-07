@@ -14,7 +14,7 @@ const PHASE_STEPS = [
 const DONE_VALUES = ['PAID', 'COMPLETED', 'DELIVERED', 'RECEIVED', 'RECEIVED_IN_OFFICE', 'ONLINE_COMPLETED', 'PHYSICAL_COMPLETED'];
 
 function PhaseCard({ phase, invoice, onUpdate, onWhatsApp }) {
-  const { hasPermission } = useAuth();
+  const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
@@ -64,8 +64,8 @@ function PhaseCard({ phase, invoice, onUpdate, onWhatsApp }) {
           </select>
         </div>
         <div className="form-group"><label className="form-label">Biometric Date</label><input type="date" className="form-control" defaultValue={invoice.biometricDate} onChange={set('biometricDate')} /></div>
-        <div className="form-group"><label className="form-label" style={{display:'flex',gap:'8px',alignItems:'center'}}><input type="checkbox" defaultChecked={invoice.biometricOnline} onChange={chk('biometricOnline')} /> Online Biometric</label></div>
-        <div className="form-group"><label className="form-label" style={{display:'flex',gap:'8px',alignItems:'center'}}><input type="checkbox" defaultChecked={invoice.biometricPhysical} onChange={chk('biometricPhysical')} /> Physical Biometric</label></div>
+        <div className="form-group"><label className="form-label" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><input type="checkbox" defaultChecked={invoice.biometricOnline} onChange={chk('biometricOnline')} /> Online Biometric</label></div>
+        <div className="form-group"><label className="form-label" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><input type="checkbox" defaultChecked={invoice.biometricPhysical} onChange={chk('biometricPhysical')} /> Physical Biometric</label></div>
         <div className="form-group"><label className="form-label">Remarks</label><textarea className="form-control" rows={2} defaultValue={invoice.biometricRemarks} onChange={set('biometricRemarks')} /></div>
       </div>
     );
@@ -135,7 +135,7 @@ function PhaseCard({ phase, invoice, onUpdate, onWhatsApp }) {
           <span className={`badge ${isDone ? 'badge-success' : statusVal !== 'PENDING' ? 'badge-info' : 'badge-warning'}`}>
             {statusVal?.replace(/_/g, ' ')}
           </span>
-          {hasPermission('invoice:edit') && (
+          {can('edit') && (
             <button className="btn btn-sm btn-outline" onClick={() => setOpen(o => !o)} style={{ marginLeft: 'auto' }}>
               {open ? 'Close' : '✏️ Update'}
             </button>
@@ -163,6 +163,7 @@ function PhaseCard({ phase, invoice, onUpdate, onWhatsApp }) {
 }
 
 export default function InvoiceDetailPage() {
+  const { can } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [invoice, setInvoice] = useState(null);
@@ -214,17 +215,17 @@ export default function InvoiceDetailPage() {
           <div className="card mb-6">
             <div className="skeleton skeleton-title" />
             <div className="grid-3 gap-4">
-              {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: '80px' }} />)}
+              {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '80px' }} />)}
             </div>
           </div>
           <div className="card">
             <div className="skeleton skeleton-title" />
-            {[1,2,3,4].map(i => <div key={i} className="skeleton-row skeleton" style={{ height: '40px' }} />)}
+            {[1, 2, 3, 4].map(i => <div key={i} className="skeleton-row skeleton" style={{ height: '40px' }} />)}
           </div>
         </div>
         <div className="card">
           <div className="skeleton skeleton-title" />
-          {[1,2,3,4,5].map(i => (
+          {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="flex gap-4 mb-6">
               <div className="skeleton skeleton-avatar" />
               <div style={{ flex: 1 }}>
@@ -248,8 +249,9 @@ export default function InvoiceDetailPage() {
             <p style={{ opacity: 0.8, fontSize: '0.875rem', marginTop: '4px' }}>{invoice.customer?.name} • {invoice.registrationNo}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--primary)' }} onClick={() => navigate(`/invoices/${id}/edit`)}>✏️ Edit</button>
-            <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }} onClick={() => window.print()}>🖨️ Print</button>
+            {can('edit') && (
+              <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--primary)' }} onClick={() => navigate(`/invoices/${id}/edit`)}>✏️ Edit</button>
+            )}
           </div>
         </div>
       </div>
@@ -294,7 +296,7 @@ export default function InvoiceDetailPage() {
                   ['Challan Amount', invoice.challanAmount],
                   ['Service Charges', invoice.serviceCharges],
                   ['Inspection Charges', invoice.inspectionCharges],
-                  ['Additional Charges', invoice.additionalCharges],
+                  ['Vendor Charges', invoice.additionalCharges],
                   ['Discount', invoice.discount],
                 ].map(([l, v]) => (
                   <div key={l} style={{ padding: '10px', background: 'var(--bg)', borderRadius: '8px' }}>

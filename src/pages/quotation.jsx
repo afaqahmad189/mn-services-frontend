@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import SearchableSelect from "../components/SearchableSelect";
+import { api } from '../context/AuthContext';
 
 const defaultForm = {
   dated: new Date().toISOString().slice(0, 10),
@@ -15,10 +17,57 @@ const defaultForm = {
   state: "Punjab",
 };
 
+
+const vehicleTypeOptions = [
+  { value: "New", label: "New" },
+  { value: "Used", label: "Used" },
+  { value: "Electric", label: "Electric" },
+  { value: "Imported", label: "Imported" },
+  { value: "PHEV", label: "PHEV" },
+];
+
+const ccOptions = [
+  { value: "1000", label: "1000 cc" },
+  { value: "1200", label: "1200 cc" },
+  { value: "1300", label: "1300 cc" },
+  { value: "1500", label: "1500 cc" },
+  { value: "1600", label: "1600 cc" },
+  { value: "1800", label: "1800 cc" },
+  { value: "2000", label: "2000 cc" },
+  { value: "2500", label: "2500 cc" },
+  { value: "3000", label: "3000 cc" },
+];
+
+const customerTypeOptions = [
+  { value: "Filer", label: "Filer" },
+  { value: "NonFiler", label: "Non-Filer" },
+];
+
+const stateOptions = [
+  { value: "Punjab", label: "Punjab" },
+  { value: "Islamabad", label: "Islamabad" },
+  { value: "Both", label: "Both" },
+];
+
+const type = [
+  { value: "Reference", label: "Reference" },
+  { value: "CNIC", label: "CNIC" },
+  { value: "Contract", label: "Contract" },
+];
+
+
 export default function QuotationPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState(defaultForm);
+  const [cars, setCars] = useState([])
+
+  const load = useCallback(async () => {
+    const { data } = await api.get('/cars/web-cars');
+    setCars(data.data);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
     if (location.state?.form) {
@@ -36,6 +85,8 @@ export default function QuotationPage() {
       [e.target.name]: e.target.value,
     }));
   };
+
+  const setField = (field) => (value) => setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -73,18 +124,12 @@ export default function QuotationPage() {
 
             <div className="form-group">
               <label className="form-label required">Vehicle Type</label>
-              <select
-                className="form-control"
-                name="vehicleType"
+              <SearchableSelect
+                options={vehicleTypeOptions}
                 value={form.vehicleType}
-                onChange={handleChange}
-              >
-                <option>New</option>
-                <option>Used</option>
-                <option>Electric</option>
-                <option>Imported</option>
-                <option>PHEV</option>
-              </select>
+                onChange={setField('vehicleType')}
+                placeholder="Select vehicle type..."
+              />
             </div>
 
             <div className="form-group">
@@ -99,7 +144,17 @@ export default function QuotationPage() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Contract No</label>
+              <label className="form-label required">Type of Qutation</label>
+              <SearchableSelect
+                options={type}
+                value={form.type}
+                onChange={setField('type')}
+                placeholder="Select type..."
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Detail</label>
               <input
                 className="form-control"
                 name="contractNo"
@@ -132,22 +187,12 @@ export default function QuotationPage() {
 
             <div className="form-group">
               <label className="form-label required">CC</label>
-              <select
-                className="form-control"
-                name="cc"
+              <SearchableSelect
+                options={ccOptions}
                 value={form.cc}
-                onChange={handleChange}
-              >
-                <option value="1000">1000</option>
-                <option value="1200">1200</option>
-                <option value="1300">1300</option>
-                <option value="1500">1500</option>
-                <option value="1600">1600</option>
-                <option value="1800">1800</option>
-                <option value="2000">2000</option>
-                <option value="2500">2500</option>
-                <option value="3000">3000</option>
-              </select>
+                onChange={setField('cc')}
+                placeholder="Select CC..."
+              />
             </div>
 
             <div className="form-group">
@@ -165,46 +210,37 @@ export default function QuotationPage() {
 
             <div className="form-group">
               <label className="form-label required">Maker / Model</label>
-              <input
-                className="form-control"
-                name="maker"
+              <SearchableSelect
+                options={cars.map(c => ({ value: c.name, label: c.name }))}
                 value={form.maker}
-                onChange={handleChange}
-                placeholder="e.g. HONDA CITY"
-                required
+                onChange={setField('maker')}
+                placeholder="Search vehicle model..."
               />
             </div>
 
             <div className="form-group">
               <label className="form-label required">Customer Type</label>
-              <select
-                className="form-control"
-                name="customerType"
+              <SearchableSelect
+                options={customerTypeOptions}
                 value={form.customerType}
-                onChange={handleChange}
-              >
-                <option>Filer</option>
-                <option>NonFiler</option>
-              </select>
+                onChange={setField('customerType')}
+                placeholder="Select customer type..."
+              />
             </div>
 
             <div className="form-group">
               <label className="form-label required">State</label>
-              <select
-                className="form-control"
-                name="state"
+              <SearchableSelect
+                options={stateOptions}
                 value={form.state}
-                onChange={handleChange}
-              >
-                <option>Punjab</option>
-                <option>Islamabad</option>
-                <option>Both</option>
-              </select>
+                onChange={setField('state')}
+                placeholder="Select state..."
+              />
             </div>
           </div>
 
           {form.vehicleType !== "New" && (
-            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 16 }}>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 16, marginTop: 12 }}>
               Auto-calculation applies only for New vehicles. Other types start with zero amounts for manual entry.
             </p>
           )}

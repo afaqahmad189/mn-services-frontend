@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { exportToExcel } from '../utils/helpers';
 
 export default function VendorLedgerPage() {
   const [view, setView] = useState('overview'); // 'overview' or 'detail'
@@ -17,7 +18,7 @@ export default function VendorLedgerPage() {
     transactionDate: new Date().toISOString().split('T')[0],
   });
   const [savingPayment, setSavingPayment] = useState(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef(null);
@@ -47,7 +48,7 @@ export default function VendorLedgerPage() {
             setSelectedVendor(matched);
             setView('detail');
             const lRes = await api.get(`/vendors/${stateVendorId}/ledger`);
-            
+
             const sorted = [...lRes.data].sort((a, b) => {
               const dateA = new Date(a.transactionDate || a.createdAt);
               const dateB = new Date(b.transactionDate || b.createdAt);
@@ -90,7 +91,7 @@ export default function VendorLedgerPage() {
       ]);
       const freshVendor = vRes.data.find(v => v.id === vendor.id);
       if (freshVendor) setSelectedVendor(freshVendor);
-      
+
       const sorted = [...lRes.data].sort((a, b) => {
         const dateA = new Date(a.transactionDate || a.createdAt);
         const dateB = new Date(b.transactionDate || b.createdAt);
@@ -146,14 +147,50 @@ export default function VendorLedgerPage() {
           <button className="btn btn-sm mb-4" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }} onClick={() => { setView('overview'); if (location.state) location.state.openVendorId = null; }}>
             ← Back to Overview
           </button>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "16px",
+            }}
+          >
             <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>🏢 Vendor Ledger: {selectedVendor?.name}</h1>
-              <p style={{ opacity: 0.8, fontSize: '0.875rem' }}>{selectedVendor?.city} • {selectedVendor?.phone || 'No phone'} • {selectedVendor?.email || 'No email'}</p>
+              <h1 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
+                🏢 Vendor Ledger: {selectedVendor?.name}
+              </h1>
+              <p style={{ opacity: 0.8, fontSize: "0.875rem" }}>
+                {selectedVendor?.city} • {selectedVendor?.phone || "No phone"} •{" "}
+                {selectedVendor?.email || "No email"}
+              </p>
             </div>
-            <button className="btn" style={{ background: '#fff', color: 'var(--primary)', fontWeight: 600 }} onClick={() => setPayModal(true)}>
-              💸 Record Payment
-            </button>
+
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                className="btn"
+                style={{
+                  background: "#fff",
+                  color: "var(--primary)",
+                  fontWeight: 600,
+                }}
+                onClick={() => exportToExcel(ledger)}
+              >
+                📊 Export Excel
+              </button>
+
+              <button
+                className="btn"
+                style={{
+                  background: "var(--primary)",
+                  color: "#fff",
+                  fontWeight: 600,
+                }}
+                onClick={() => setPayModal(true)}
+              >
+                💸 Record Payment
+              </button>
+            </div>
           </div>
         </div>
 
@@ -420,7 +457,7 @@ export default function VendorLedgerPage() {
                               color: +v.balance > 0 ? 'var(--danger)' : +v.balance < 0 ? 'var(--success)' : 'inherit',
                               fontSize: '1rem'
                             }}>
-                              Rs. {Math.abs(+v.balance || 0).toLocaleString()} 
+                              Rs. {Math.abs(+v.balance || 0).toLocaleString()}
                               <span style={{ fontSize: '0.75rem', fontWeight: 500, marginLeft: '4px' }}>
                                 {+v.balance > 0 ? '(Owed)' : +v.balance < 0 ? '(Adv.)' : '(Settled)'}
                               </span>

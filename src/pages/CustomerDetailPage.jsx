@@ -92,13 +92,14 @@ export default function CustomerDetailPage() {
           <div className="card" style={{ padding: 0 }}>
             <div className="table-container">
               <table>
-                <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Description</th><th>Invoice</th></tr></thead>
+                <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Payment Method</th><th>Description</th><th>Invoice</th></tr></thead>
                 <tbody>
                   {ledger.map(e => (
                     <tr key={e.id}>
                       <td style={{ fontSize: '0.8rem' }}>{e.transactionDate}</td>
                       <td><span className={`badge ${e.type === 'DEBIT' ? 'badge-danger' : 'badge-success'}`}>{e.type}</span></td>
                       <td style={{ fontWeight: 600, color: e.type === 'DEBIT' ? 'var(--danger)' : 'var(--success)' }}>Rs. {(+e.amount).toLocaleString()}</td>
+                      <td style={{ fontSize: '0.875rem' }}>{e.paymentMethod}</td>
                       <td style={{ fontSize: '0.875rem' }}>{e.description}</td>
                       <td style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>{e.invoice?.invoiceNumber}</td>
                     </tr>

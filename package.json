@@ -13,6 +13,7 @@
     "@syncfusion/ej2-react-documenteditor": "^33.2.12",
     "axios": "^1.16.0",
     "date-fns": "^4.1.0",
+    "file-saver": "^2.0.5",
     "mammoth": "^1.12.0",
     "pdf-lib": "^1.17.1",
     "react": "^18.2.0",
@@ -21,7 +22,8 @@
     "react-pdf": "^10.4.1",
     "react-router-dom": "^7.15.0",
     "react-to-print": "^3.3.0",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

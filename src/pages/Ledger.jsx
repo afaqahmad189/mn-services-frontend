@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { exportToExcel } from '../utils/helpers';
 
 export default function LedgerPage() {
   const [view, setView] = useState('overview'); // 'overview' or 'detail'
@@ -68,8 +69,37 @@ export default function LedgerPage() {
           <button className="btn btn-sm mb-4" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }} onClick={() => setView('overview')}>
             ← Back to Overview
           </button>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>📒 Ledger: {selectedCustomer?.name}</h1>
-          <p style={{ opacity: 0.8, fontSize: '0.875rem' }}>{selectedCustomer?.phone} • {selectedCustomer?.cnic}</p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "16px",
+            }}
+          >
+            <div>
+              <h1 style={{ fontSize: "1.5rem", fontWeight: 700, margin: 0 }}>
+                📒 Ledger: {selectedCustomer?.name}
+              </h1>
+              <p style={{ opacity: 0.8, fontSize: "0.875rem", margin: "6px 0 0" }}>
+                {selectedCustomer?.phone} • {selectedCustomer?.cnic}
+              </p>
+            </div>
+
+            <button
+              className="btn"
+              style={{
+                background: "#fff",
+                color: "var(--primary)",
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+              }}
+              onClick={() => exportToExcel(ledger)}
+            >
+              📊 Export Excel
+            </button>
+          </div>
         </div>
 
         <div className="page-content">
@@ -85,6 +115,7 @@ export default function LedgerPage() {
                     <tr>
                       <th>Date</th>
                       <th>Description</th>
+                      <th>Payment Method</th>
                       <th>Invoice</th>
                       <th>Debit (Rs.)</th>
                       <th>Credit (Rs.)</th>
@@ -93,12 +124,13 @@ export default function LedgerPage() {
                   </thead>
                   <tbody>
                     {ledger.length === 0 ? (
-                      <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>No transactions found</td></tr>
+                      <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px' }}>No transactions found</td></tr>
                     ) : (
                       ledger.map((entry) => (
                         <tr key={entry.id}>
                           <td>{new Date(entry.transactionDate || entry.createdAt).toLocaleDateString()}</td>
                           <td>{entry.description}</td>
+                          <td>{entry.paymentMethod}</td>
                           <td>
                             {entry.invoiceId ? (
                               <span

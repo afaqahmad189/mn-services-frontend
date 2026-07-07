@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import SearchableSelect from '../components/SearchableSelect';
 
 const STATUS_BADGE = {
   DRAFT: 'badge-gray', ACTIVE: 'badge-info',
@@ -15,6 +17,7 @@ const PLATE_BADGE = {
 };
 
 export default function InvoiceListPage() {
+  const { can } = useAuth();
   const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
   const [total, setTotal] = useState(0);
@@ -50,9 +53,11 @@ export default function InvoiceListPage() {
               {total} total cases in the system
             </p>
           </div>
-          <button className="btn btn-primary" style={{ background: '#fff', color: 'var(--primary)' }} onClick={() => navigate('/invoices/new')}>
-            ➕ New Invoice
-          </button>
+          {can('create') && (
+            <button className="btn btn-primary" style={{ background: '#fff', color: 'var(--primary)' }} onClick={() => navigate('/invoices/new')}>
+              ➕ New Invoice
+            </button>
+          )}
         </div>
       </div>
 
@@ -67,13 +72,20 @@ export default function InvoiceListPage() {
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
           </div>
-          <select className="form-control" style={{ width: '180px' }} value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
-            <option value="">All Statuses</option>
-            <option value="DRAFT">Draft</option>
-            <option value="ACTIVE">Active</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
+          <div style={{ width: '180px' }}>
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'DRAFT', label: 'Draft' },
+                { value: 'ACTIVE', label: 'Active' },
+                { value: 'COMPLETED', label: 'Completed' },
+                { value: 'CANCELLED', label: 'Cancelled' },
+              ]}
+              value={status}
+              onChange={(v) => { setStatus(v); setPage(1); }}
+              placeholder="All Statuses"
+            />
+          </div>
         </div>
 
         {loading && page === 1 ? (

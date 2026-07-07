@@ -14,7 +14,6 @@ import ExpensesPage from './pages/ExpensesPage';
 import ReportsPage from './pages/ReportsPage';
 import WhatsAppPage from './pages/WhatsAppPage';
 import UsersPage from './pages/UsersPage';
-import AuditLogsPage from './pages/AuditLogsPage';
 import VendorsPage from './pages/VendorsPage';
 import LedgerPage from './pages/Ledger';
 import VendorLedgerPage from './pages/VendorLedger';
@@ -29,6 +28,9 @@ import QuotationPreviewPage from './pages/quotationPreview';
 import QuotationListPage from './pages/QuotationListPage';
 import FormToPage from './pages/FormToPage';
 import SmartCardFormPage from './pages/FormSmartCardPage';
+import FormNTNPage from './pages/FormNTNPage';
+import CarsPage from './pages/CarsPage';
+import WebsitesPage from './pages/WebsitesPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -45,6 +47,13 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+// Guard for sections that operators cannot access
+function RoleGuard({ children, section }) {
+  const { canAccess } = useAuth();
+  if (!canAccess(section)) return <Navigate to="/" replace />;
+  return children;
+}
+
 function InvoiceEditWrapper() {
   const { id } = useParams();
   return <InvoiceFormPage editId={id} />;
@@ -56,29 +65,33 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index element={<DashboardPage />} />
-        <Route path="quotations" element={<QuotationPage />} />
-        <Route path="quotations/list" element={<QuotationListPage />} />
-        <Route path="quotation/preview" element={<QuotationPreviewPage />} />
-        <Route path="invoices" element={<InvoiceListPage />} />
-        <Route path="invoices/new" element={<InvoiceFormPage />} />
-        <Route path="invoices/:id" element={<InvoiceDetailPage />} />
-        <Route path="invoices/:id/edit" element={<InvoiceEditWrapper />} />
-        <Route path="customers" element={<CustomersPage />} />
-        <Route path="customers/:id" element={<CustomerDetailPage />} />
-        <Route path="vendors" element={<VendorsPage />} />
-        <Route path="expenses" element={<ExpensesPage />} />
-        <Route path="reports" element={<ReportsPage />} />
-        <Route path="whatsapp" element={<WhatsAppPage />} />
-        <Route path="users" element={<UsersPage />} />
-        <Route path="forms" element={<FormsPage />} />
-        <Route path="forms/f" element={<FormFPage />} />
-        <Route path="forms/to" element={<FormToPage />} />
-        <Route path="forms/smartcard" element={<SmartCardFormPage />} />
-        <Route path="audit-logs" element={<AuditLogsPage />} />
-        <Route path="ledger" element={<LedgerPage />} />
-        <Route path="vendor-ledger" element={<VendorLedgerPage />} />
-        <Route path="settings" element={<SettingsPage />} />
+        <Route index element={<RoleGuard section="dashboard"><DashboardPage /></RoleGuard>} />
+        <Route path="quotations" element={<RoleGuard section="quotation"><QuotationPage /></RoleGuard>} />
+        <Route path="quotations/list" element={<RoleGuard section="quotation"><QuotationListPage /></RoleGuard>} />
+        <Route path="quotation/preview" element={<RoleGuard section="quotation"><QuotationPreviewPage /></RoleGuard>} />
+        <Route path="invoices" element={<RoleGuard section="invoice"><InvoiceListPage /></RoleGuard>} />
+        <Route path="invoices/new" element={<RoleGuard section="invoice"><InvoiceFormPage /></RoleGuard>} />
+        <Route path="invoices/:id" element={<RoleGuard section="invoice"><InvoiceDetailPage /></RoleGuard>} />
+        <Route path="invoices/:id/edit" element={<RoleGuard section="invoice"><InvoiceEditWrapper /></RoleGuard>} />
+        <Route path="customers" element={<RoleGuard section="customer"><CustomersPage /></RoleGuard>} />
+        <Route path="customers/:id" element={<RoleGuard section="customer"><CustomerDetailPage /></RoleGuard>} />
+        <Route path="cars" element={<RoleGuard section="cars"><CarsPage /></RoleGuard>} />
+        <Route path="websites" element={<RoleGuard section="websites"><WebsitesPage /></RoleGuard>} />
+
+        <Route path="vendors" element={<RoleGuard section="vendor"><VendorsPage /></RoleGuard>} />
+        <Route path="expenses" element={<RoleGuard section="expense"><ExpensesPage /></RoleGuard>} />
+        <Route path="reports" element={<RoleGuard section="report"><ReportsPage /></RoleGuard>} />
+        <Route path="whatsapp" element={<RoleGuard section="whatsapp"><WhatsAppPage /></RoleGuard>} />
+        <Route path="users" element={<RoleGuard section="user"><UsersPage /></RoleGuard>} />
+        <Route path="forms" element={<RoleGuard section="forms"><FormsPage /></RoleGuard>} />
+        <Route path="forms/f" element={<RoleGuard section="forms"><FormFPage /></RoleGuard>} />
+        <Route path="forms/to" element={<RoleGuard section="forms"><FormToPage /></RoleGuard>} />
+        <Route path="forms/smartcard" element={<RoleGuard section="forms"><SmartCardFormPage /></RoleGuard>} />
+        <Route path="forms/ntn" element={<RoleGuard section="forms"><FormNTNPage /></RoleGuard>} />
+        <Route path="ledger" element={<RoleGuard section="ledger"><LedgerPage /></RoleGuard>} />
+        <Route path="vendor-ledger" element={<RoleGuard section="ledger"><VendorLedgerPage /></RoleGuard>} />
+        <Route path="settings" element={<RoleGuard section="settings"><SettingsPage /></RoleGuard>} />
+        <Route path="pdf-viewer" element={<PdfViewerPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

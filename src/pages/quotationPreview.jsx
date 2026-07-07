@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { api } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { buildQuotationData } from "../utils/quotationCalculator";
 import {
   CHALLAN_LABELS,
@@ -35,6 +36,7 @@ function AmountCell({ value, onChange, editable = true }) {
 export default function QuotationPreview() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { can } = useAuth();
 
   const form = state?.form || state || {};
   const editId = state?.editId || null;
@@ -43,6 +45,8 @@ export default function QuotationPreview() {
   const [data, setData] = useState(EMPTY_CHARGES);
   const [saving, setSaving] = useState(false);
   const [quotationNumber, setQuotationNumber] = useState(savedQuotationNumber);
+  // Feature 5: print mode toggle — 'quotation' or 'invoice'
+  const [printMode, setPrintMode] = useState('quotation');
 
   useEffect(() => {
     if (state?.challanData && state?.servicesData) {
@@ -92,6 +96,7 @@ export default function QuotationPreview() {
       dated: form.dated || new Date().toISOString().slice(0, 10),
       customerName: form.customerName,
       specialNo: form.specialNo || null,
+      type: form.type || null,
       contractNo: form.contractNo || null,
       registrationNo: form.registrationNo || null,
       vehicleType: form.vehicleType,
@@ -103,7 +108,6 @@ export default function QuotationPreview() {
       challanData: data.challan,
       servicesData: data.services,
     };
-
     setSaving(true);
     try {
       if (editId) {
@@ -139,6 +143,9 @@ export default function QuotationPreview() {
   const vehicleInfo = [form.maker, form.vehicleType].filter(Boolean).join(" - ");
   const invoiceValue = form.carPrice ? Number(form.carPrice).toLocaleString() : "-";
 
+  // The document title shown on the printed bill
+  const docTitle = printMode === 'invoice' ? 'INVOICE' : 'QUOTATION';
+  const docNumberLabel = printMode === 'invoice' ? 'INVOICE NO:' : 'QUOTATION NO:';
 
   return (
     <div className="quotation-page">
@@ -149,12 +156,34 @@ export default function QuotationPreview() {
         <button className="btn btn-outline" onClick={() => navigate("/quotations/list")}>
           View Saved Quotations
         </button>
-        <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : editId ? "Update Quotation" : "Save Quotation"}
-        </button>
-        <button className="btn btn-primary" onClick={() => window.print()}>
-          Print Quotation
-        </button>
+
+        {can('edit') && (
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            {saving ? "Saving..." : editId ? "Update Quotation" : "Save Quotation"}
+          </button>
+        )}
+
+        {/* Print mode toggle + Print */}
+        {can('view') && (
+          <div className="print-mode-group">
+            <span className="print-mode-label">Print as:</span>
+            <button
+              className={`btn btn-sm ${printMode === 'quotation' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setPrintMode('quotation')}
+            >
+              📋 Quotation
+            </button>
+            <button
+              className={`btn btn-sm ${printMode === 'invoice' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setPrintMode('invoice')}
+            >
+              🧾 Invoice
+            </button>
+            <button className="btn btn-primary" onClick={() => window.print()}>
+              🖨️ Print
+            </button>
+          </div>
+        )}
       </div>
 
       <div style={{ overflowX: 'auto', width: '100%', paddingBottom: '20px' }}>
@@ -176,39 +205,42 @@ export default function QuotationPreview() {
             <p className="bill-tagline">
               We Deals In All Kind Of Motor Vehicles Registrations In All Over The Pakistan, NTN - 3220154-7
             </p>
-            <h2 className="bill-title">QUOTATION</h2>
+            <h2 className="bill-title">{docTitle}</h2>
           </header>
+
+          {/* Print-only document type label */}
+          <div className="print-doc-type-label" style={{ textAlign: 'center', fontWeight: 800, fontSize: '1.1rem', letterSpacing: '0.15em', marginBottom: '8px', color: '#0D2B5E' }}>
+            {docTitle}
+          </div>
 
           <div className="bill-info-box">
             <div className="bill-info-row">
-              <span className="bill-info-label">DATED:</span>
-              <span>{formatDate(form.dated)}</span>
+              <span>DATED:</span>
+              <span style={{ fontSize: "16px", fontWeight: 700, marginLeft: 10 }}>{formatDate(form.dated)}</span>
               {quotationNumber && (
                 <>
-                  <span className="bill-info-label" style={{ marginLeft: 24 }}>QUOTATION NO:</span>
-                  <span>{quotationNumber}</span>
+                  <span style={{ marginLeft: 24 }}>{docNumberLabel}</span>
+                  <span style={{ fontSize: "16px", fontWeight: 700, marginLeft: 10 }}>{quotationNumber}</span>
                 </>
               )}
+              <span style={{ marginLeft: 24 }}>Customer Name:</span>
+              <span className="bill-info-value" style={{ fontSize: "16px", fontWeight: 700, marginLeft: 10 }}>{form.customerName}</span>
             </div>
             <div className="bill-info-row">
-              <span className="bill-info-label">Customer Name:</span>
-              <span className="bill-info-value">{form.customerName}</span>
+              <span>Type of Qutation:</span>
+              <span style={{ fontSize: "16px", fontWeight: 700, marginLeft: 10 }}>{form.type || "-"}</span>
+              <span style={{ marginLeft: 24 }} >Contract No:</span>
+              <span style={{ fontSize: "16px", fontWeight: 700, marginLeft: 10 }}>{form.contractNo || "-"}</span>
             </div>
             <div className="bill-info-row">
-              <span className="bill-info-label">Contract No:</span>
-              <span>{form.contractNo || "-"}</span>
-            </div>
-            <div className="bill-info-row">
-              <span className="bill-info-label">VEHICLE TYPE &amp; INVOICE VALUE:</span>
-              <span>{vehicleInfo} — Rs. {invoiceValue}</span>
+              <span>VEHICLE TYPE &amp; INVOICE VALUE:</span>
+              <span style={{ fontSize: "16px", fontWeight: 700, marginLeft: 10 }}>{vehicleInfo} — Rs. {invoiceValue}</span>
             </div>
             <div className="bill-info-row bill-reg-row">
-              <span className="bill-info-label">REGISTRATION NO.:</span>
-              <span>{form.registrationNo || "-"}</span>
-            </div>
-            <div className="bill-info-row bill-reg-row">
-              <span className="bill-info-label">SPECIAL NO.:</span>
-              <span>{form.specialNo || "-"}</span>
+              <span>REGISTRATION NO.:</span>
+              <span style={{ fontSize: "16px", fontWeight: 700, marginLeft: 10 }}>{form.registrationNo || "-"}</span>
+              <span style={{ marginLeft: 34 }}>SPECIAL NO.:</span>
+              <span style={{ fontSize: "16px", fontWeight: 700, marginLeft: 10 }}>{form.specialNo || "-"}</span>
             </div>
           </div>
 
@@ -284,11 +316,11 @@ export default function QuotationPreview() {
 
           <div className="bill-signature">
             <p className="text-danger">
-              <strong>Note:</strong> This quotation is provided for estimation purposes only. Final pricing may vary based on project requirements, scope changes, and market conditions.
+              <strong>Note:</strong> This {docTitle.toLowerCase()} is provided for estimation purposes only. Final pricing may vary based on project requirements, scope changes, and market conditions.
             </p>
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }

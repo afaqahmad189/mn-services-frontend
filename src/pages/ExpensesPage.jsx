@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { api } from '../context/AuthContext';
+import SearchableSelect from '../components/SearchableSelect';
 
 export default function ExpensesPage() {
   const [heads, setHeads] = useState([]);
@@ -41,7 +42,7 @@ export default function ExpensesPage() {
       <div style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: '#fff', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div><h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>💸 Daily Expenses</h1><p style={{ opacity: 0.8, fontSize: '0.875rem' }}>Total shown: Rs. {total.toLocaleString()}</p></div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className='expenseBtn' style={{ display: 'flex', gap: '8px' }}>
             <button className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }} onClick={() => setHeadModal(true)}>+ Expense Head</button>
             <button className="btn" style={{ background: '#fff', color: 'var(--primary)', fontWeight: 600 }} onClick={() => setRecModal(true)}>+ Add Expense</button>
           </div>
@@ -87,10 +88,14 @@ export default function ExpensesPage() {
                     <span>→</span>
                     <input type="date" className="form-control" style={{ width: '160px' }} value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} />
                   </div>
-                  <select className="form-control" style={{ width: '200px' }} value={filters.headId} onChange={e => setFilters(f => ({ ...f, headId: e.target.value }))}>
-                    <option value="">All Heads</option>
-                    {heads.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-                  </select>
+                  <div style={{ width: '200px' }}>
+                    <SearchableSelect
+                      options={[{ value: '', label: 'All Heads' }, ...heads.map(h => ({ value: String(h.id), label: h.name }))]}
+                      value={String(filters.headId)}
+                      onChange={(v) => setFilters(f => ({ ...f, headId: v }))}
+                      placeholder="All Heads"
+                    />
+                  </div>
                   <button className="btn btn-outline btn-sm" onClick={() => window.print()}>🖨️ Print</button>
                 </div>
                 <div className="card" style={{ padding: 0 }}>
@@ -168,17 +173,26 @@ export default function ExpensesPage() {
             <div className="modal-body">
               <div className="form-grid">
                 <div className="form-group"><label className="form-label required">Expense Head</label>
-                  <select className="form-control" value={recForm.headId} onChange={e => setRecForm(f => ({ ...f, headId: e.target.value }))} required>
-                    <option value="">Select Head...</option>
-                    {heads.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-                  </select>
+                  <SearchableSelect
+                    options={[{ value: '', label: 'Select Head...' }, ...heads.map(h => ({ value: String(h.id), label: h.name }))]}
+                    value={String(recForm.headId)}
+                    onChange={(v) => setRecForm(f => ({ ...f, headId: v }))}
+                    placeholder="Select Head..."
+                  />
                 </div>
                 <div className="form-group"><label className="form-label required">Amount (Rs.)</label><input type="number" className="form-control" value={recForm.amount} onChange={e => setRecForm(f => ({ ...f, amount: e.target.value }))} /></div>
                 <div className="form-group"><label className="form-label required">Date</label><input type="date" className="form-control" value={recForm.expenseDate} onChange={e => setRecForm(f => ({ ...f, expenseDate: e.target.value }))} /></div>
                 <div className="form-group"><label className="form-label">Payment Method</label>
-                  <select className="form-control" value={recForm.paymentMethod} onChange={e => setRecForm(f => ({ ...f, paymentMethod: e.target.value }))}>
-                    <option value="CASH">Cash</option><option value="BANK">Bank</option><option value="CHEQUE">Cheque</option>
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: 'CASH', label: 'Cash' },
+                      { value: 'BANK', label: 'Bank' },
+                      { value: 'CHEQUE', label: 'Cheque' },
+                    ]}
+                    value={recForm.paymentMethod}
+                    onChange={(v) => setRecForm(f => ({ ...f, paymentMethod: v }))}
+                    placeholder="Select method..."
+                  />
                 </div>
                 <div className="form-group" style={{ gridColumn: 'span 2' }}><label className="form-label">Description</label><textarea className="form-control" rows={2} value={recForm.description} onChange={e => setRecForm(f => ({ ...f, description: e.target.value }))} /></div>
               </div>

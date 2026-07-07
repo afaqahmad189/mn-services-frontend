@@ -19,8 +19,8 @@ function calculateRegistrationFeePb(cc, price) {
 
 function calculateTokenTaxPb(cc, price) {
   if (cc <= 1000) return 20000;
-  if (cc <= 2000) return price * 0.002;
-  return price * 0.003;
+  if (cc <= 2000) return price * 0.003;
+  return price * 0.004;
 }
 
 function calculateIncomeTaxPb(cc, customerType) {
@@ -65,14 +65,20 @@ function calculateRegistrationFeeIsb(cc, price) {
   return price * 0.04;
 }
 
-function calculateTokenTaxIsb(cc) {
-  if (cc <= 1000) return 10000;
-  if (cc <= 1200) return 1500;
-  if (cc <= 1500) return 4000;
-  if (cc <= 2000) return 5000;
-  if (cc <= 2500) return 8000;
-  return 12000; // 2501-3000
+function calculateTokenTaxIsb(cc, price) {
+  if (cc <= 1000) return 20000;
+  if (cc <= 2000) return price * 0.0025;
+  return price * 0.004;
 }
+
+// function calculateTokenTaxIsb(cc) {
+//   if (cc <= 1000) return 10000;
+//   if (cc <= 1200) return 1500;
+//   if (cc <= 1500) return 4000;
+//   if (cc <= 2000) return 5000;
+//   if (cc <= 2500) return 8000;
+//   return 12000; // 2501-3000
+// }
 
 function calculateIncomeTaxIsb(cc, customerType) {
   let base = 0;
@@ -106,7 +112,7 @@ export function calculateVehicleCharges(form) {
 
   // Islamabad
   const regFeeIsb = calculateRegistrationFeeIsb(cc, price);
-  const tokenIsb = calculateTokenTaxIsb(cc);
+  const tokenIsb = calculateTokenTaxIsb(cc, price);
   const incomeIsb = calculateIncomeTaxIsb(cc, form.customerType);
   const profIsb = 100;
   const hpaIsb = 0;
@@ -121,7 +127,7 @@ export function calculateVehicleCharges(form) {
       IncomeTax: distributeByState(state, incomePb, incomeIsb),
       ProfessionalTax: distributeByState(state, profPb, profIsb),
       NumberPlate: distributeByState(state, 0, 1000),
-      SmartCard: distributeByState(state, 1300, 1500),
+      SmartCard: distributeByState(state, 1300, 2400),
       AdvanceTax: distributeByState(state, 0, 0),
       SpecialNoFee: distributeByState(state, 0, 0),
       TransferFee: distributeByState(state, transferPb, transferIsb),
