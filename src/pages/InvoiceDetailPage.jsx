@@ -173,6 +173,7 @@ export default function InvoiceDetailPage() {
   const [waModal, setWaModal] = useState({ open: false, phase: '' });
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [finOpen, setFinOpen] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -246,7 +247,7 @@ export default function InvoiceDetailPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{invoice.invoiceNumber}</h1>
-            <p style={{ opacity: 0.8, fontSize: '0.875rem', marginTop: '4px' }}>{invoice.customer?.name} • {invoice.registrationNo}</p>
+            <p style={{ opacity: 0.8, fontSize: '0.875rem', marginTop: '4px' }}>{invoice.customer?.name}{invoice.customerName ? ` • ${invoice.customerName}` : ''} • {invoice.registrationNo}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             {can('edit') && (
@@ -266,6 +267,10 @@ export default function InvoiceDetailPage() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {[
+                  ['Organization', invoice.customer?.name],
+                  ['Customer Name', invoice.customerName],
+                  ['Created At', invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : ''],
+                  ['Status Changed At', invoice.statusChangeDate ? new Date(invoice.statusChangeDate).toLocaleDateString() : '—'],
                   ['Excise Office', invoice.exciseOffice],
                   ['Reg. No.', invoice.registrationNo],
                   ['New Reg. No.', invoice.newRegistrationNo],
@@ -287,11 +292,13 @@ export default function InvoiceDetailPage() {
 
             {/* FINANCIAL */}
             <div className="card">
-              <div className="card-header">
-                <div className="card-title">💰 Financial Summary</div>
-                <button className="btn btn-sm btn-primary" onClick={() => setPayModal(true)}>+ Record Payment</button>
+              <div className="card-header" style={{ cursor: 'pointer' }} onClick={() => setFinOpen(!finOpen)}>
+                <div className="card-title">💰 Financial Summary {finOpen ? '▲' : '▼'}</div>
+                <button className="btn btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); setPayModal(true); }}>+ Record Payment</button>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+              {finOpen && (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px', marginTop: '16px' }}>
                 {[
                   ['Challan Amount', invoice.challanAmount],
                   ['Service Charges', invoice.serviceCharges],
@@ -319,6 +326,8 @@ export default function InvoiceDetailPage() {
                   <div style={{ fontSize: '1.25rem', fontWeight: 700, color: +invoice.remainingBalance > 0 ? 'var(--danger)' : 'var(--success)' }}>Rs. {(+invoice.remainingBalance || 0).toLocaleString()}</div>
                 </div>
               </div>
+              </>
+              )}
             </div>
           </div>
 
@@ -329,9 +338,12 @@ export default function InvoiceDetailPage() {
               <span className={`badge ${invoice.status === 'COMPLETED' ? 'badge-success' : 'badge-info'}`}>{invoice.status}</span>
             </div>
             <div className="phases-timeline">
-              {PHASE_STEPS.map(phase => (
-                <PhaseCard key={phase.key} phase={phase} invoice={invoice} onUpdate={load} onWhatsApp={handleWhatsApp} />
-              ))}
+              {PHASE_STEPS.map(phase => {
+                if (phase.key === 'smart-card' && invoice.hasSmartCard === false) return null;
+                if (phase.key === 'number-plate' && invoice.hasNumberPlate === false) return null;
+                if (phase.key === 'file' && invoice.hasFile === false) return null;
+                return <PhaseCard key={phase.key} phase={phase} invoice={invoice} onUpdate={load} onWhatsApp={handleWhatsApp} />;
+              })}
             </div>
             {invoice.status !== 'COMPLETED' && +invoice.remainingBalance === 0 && (
               <div style={{ marginTop: '16px' }}>

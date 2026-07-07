@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api, useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
@@ -17,8 +17,12 @@ const STATUS_COLORS = {
 
 export default function ReportsPage() {
   const { hasPermission } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
-  const [tab, setTab] = useState('financial');
+  const [tab, setTab] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('tab') || 'financial';
+  });
   const [financial, setFinancial] = useState(null);
   const [cases, setCases] = useState([]);
   const [casesTotal, setCasesTotal] = useState(0);
@@ -28,6 +32,7 @@ export default function ReportsPage() {
   const [pendingPage, setPendingPage] = useState(1);
   const [monthly, setMonthly] = useState([]);
   const [cashBook, setCashBook] = useState(null);
+  const [cashBookMeta, setCashBookMeta] = useState({ openingBalance: 0, handoverAmount: 0 });
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ from: '', to: '', status: '', search: '', cashBookDate: new Date().toISOString().split('T')[0] });
   const limit = 20;
@@ -40,7 +45,7 @@ export default function ReportsPage() {
       const [f, c, p, m, cb] = await Promise.all([
         api.get('/reports/financial', { params: filters }),
         api.get('/reports/cases', { params: { ...filters, page: casesPage, limit } }),
-        api.get('/reports/pending-balances', { params: { page: pendingPage, limit } }),
+        api.get('/reports/pending-balances', { params: { search: filters.search, page: pendingPage, limit } }),
         api.get('/reports/monthly-revenue'),
         api.get('/reports/cash-book', { params: { date: filters.cashBookDate } }),
       ]);
@@ -51,8 +56,18 @@ export default function ReportsPage() {
       setPendingTotal(p.data.total);
       setMonthly(m.data);
       setCashBook(cb.data);
+      setCashBookMeta({ openingBalance: cb.data.openingBalance || 0, handoverAmount: cb.data.handoverAmount || 0 });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveMeta = async () => {
+    try {
+      await api.post('/reports/cash-book/meta', { date: filters.cashBookDate, ...cashBookMeta });
+      load();
+    } catch (e) {
+      alert('Error saving meta');
     }
   };
 
@@ -64,6 +79,19 @@ export default function ReportsPage() {
   }, [filters, casesPage, pendingPage]);
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && tabParam !== tab) {
+      setTab(tabParam);
+    }
+  }, [location.search]);
+
+  const handleTabChange = (t) => {
+    setTab(t);
+    navigate(`/reports${t === 'financial' ? '' : `?tab=${t}`}`, { replace: true });
+  };
+
+  useEffect(() => {
     searchRef.current?.focus();
   }, [tab]);
 
@@ -72,15 +100,20 @@ export default function ReportsPage() {
       <div className='toptab' style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: '#fff', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div><h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>📊 Reports</h1><p style={{ opacity: 0.8, fontSize: '0.875rem' }}>Analytics & operational insights</p></div>
-          {hasPermission('report:print') && (
-            <button className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }} onClick={() => window.print()}>🖨️ Print Report</button>
-          )}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {hasPermission('report:print') && (
+              <>
+                <button className="btn" style={{ background: 'var(--success)', color: '#fff', border: 'none' }} onClick={() => { alert("Please select 'Save as PDF' in the print dialog as the destination."); window.print(); }}>💾 Save PDF</button>
+                <button className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }} onClick={() => window.print()}>🖨️ Print Report</button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="page-content">
         {/* FILTERS - Only show for Cases and Pending Balance tabs */}
-        {(tab === 'cases') && (
+        {(tab === 'cases' || tab === 'pending') && (
           <div className="filter-bar mb-6">
             <input
               ref={searchRef}
@@ -106,7 +139,7 @@ export default function ReportsPage() {
 
         <div className="tabs">
           {['financial', 'cases', 'pending', 'cashbook'].map(t => (
-            <button key={t} className={`tab-btn ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
+            <button key={t} className={`tab-btn ${tab === t ? 'active' : ''}`} onClick={() => handleTabChange(t)}>
               {t === 'financial' ? '💰 Financial' : t === 'cases' ? '📄 Case Report' : t === 'pending' ? '⚠️ Pending Balances' : '📒 Daily Cash Book'}
             </button>
           ))}
@@ -176,7 +209,7 @@ export default function ReportsPage() {
                 <div className="table-container">
                   <table>
                     <thead>
-                      <tr><th>Invoice #</th><th>Customer</th><th>Registration</th><th>Vendor</th><th>Status</th><th>Amount</th><th>Created</th></tr>
+                      <tr><th>Invoice #</th><th>Organization</th><th>Customer Name</th><th>Registration</th><th>Vendor</th><th>Status</th><th>Amount</th><th>Created</th></tr>
                     </thead>
                     <tbody>
                       {cases.map(inv => (
@@ -185,6 +218,9 @@ export default function ReportsPage() {
                             {inv.invoiceNumber}
                           </td>
                           <td>{inv.customer?.name}</td>
+                          <td>
+                            {inv.customerName}
+                          </td>
                           <td>{inv.registrationNo}</td>
                           <td>{inv.vendor?.name}</td>
                           <td><span className={`badge ${STATUS_COLORS[inv.status] || 'badge-info'}`}>{inv.status}</span></td>
@@ -210,14 +246,15 @@ export default function ReportsPage() {
                 <div className="table-container">
                   <table>
                     <thead>
-                      <tr><th>Customer</th><th>Invoice #</th><th>Total Bill</th><th>Amount Received</th><th>Balance</th><th>Aging</th></tr>
+                      <tr><th>Organization</th><th>Car Number</th><th>Invoice #</th><th>Total Bill</th><th>Amount Received</th><th>Balance</th><th>Aging</th></tr>
                     </thead>
                     <tbody>
                       {pending.map(inv => {
                         const days = Math.floor((Date.now() - new Date(inv.createdAt)) / 86400000);
                         return (
                           <tr key={inv.id}>
-                            <td>{inv.customer?.name}</td>
+                            <td>{inv.customer?.name} {inv.customerName ? `(${inv.customerName})` : ''}</td>
+                            <td>{inv.registrationNo || '—'}</td>
                             <td style={{ fontWeight: 600, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
                               {inv.invoiceNumber}
                             </td>
@@ -334,11 +371,48 @@ export default function ReportsPage() {
                     </div>
                   </div>
 
+                  {/* META INPUTS */}
+                  <div className="card mt-6 no-print">
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label className="form-label">Opening Balance / ابتدائی بیلنس</label>
+                        <input type="number" className="form-control" value={cashBookMeta.openingBalance} onChange={e => setCashBookMeta(m => ({ ...m, openingBalance: e.target.value }))} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Handover Amount / جمع کرائی گئی رقم</label>
+                        <input type="number" className="form-control" value={cashBookMeta.handoverAmount} onChange={e => setCashBookMeta(m => ({ ...m, handoverAmount: e.target.value }))} />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                        <button className="btn btn-primary" onClick={handleSaveMeta}>💾 Save Balance Data</button>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* SUMMARY CARD */}
-                  <div className="card mt-6" style={{ background: 'var(--primary)', color: '#fff', textAlign: 'center', padding: '30px' }}>
-                    <div style={{ fontSize: '1rem', opacity: 0.9 }}>NET CASH IN HAND / خالص نقد رقم</div>
-                    <div style={{ fontSize: '2.5rem', fontWeight: 800, marginTop: '8px' }}>Rs. {cashBook.netCash.toLocaleString()}</div>
-                    <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '4px' }}>Date: {new Date(cashBook.date).toLocaleDateString()}</div>
+                  <div className="card mt-6" style={{ background: 'var(--primary-dark)', color: '#fff', padding: '30px', borderRadius: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', textAlign: 'center', marginBottom: '24px' }}>
+                      <div>
+                        <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>Opening Balance</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>Rs. {cashBook.openingBalance.toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>Total In</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#4ade80' }}>+ Rs. {cashBook.totalIn.toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>Total Out</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#f87171' }}>- Rs. {cashBook.totalOut.toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>Handover Amount</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#fbbf24' }}>- Rs. {cashBook.handoverAmount.toLocaleString()}</div>
+                      </div>
+                    </div>
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '24px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '1.1rem', opacity: 0.9 }}>FINAL CLOSING BALANCE / آخری بیلنس</div>
+                      <div style={{ fontSize: '3rem', fontWeight: 800, marginTop: '8px' }}>Rs. {(cashBook.netCash - cashBook.handoverAmount).toLocaleString()}</div>
+                      <div style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '4px' }}>Date: {new Date(cashBook.date).toLocaleDateString()}</div>
+                    </div>
                   </div>
                 </div>
               </div>

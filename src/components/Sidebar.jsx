@@ -29,6 +29,7 @@ const navItems = [
   {
     section: 'Finance', items: [
       { path: '/expenses', icon: '💸', label: 'Daily Expenses', section: 'expense' },
+      { path: '/reports?tab=cashbook', icon: '📒', label: 'Daily Cash Book', section: 'report' },
       { path: '/reports', icon: '📈', label: 'Reports', section: 'report' },
     ]
   },
@@ -52,8 +53,16 @@ export default function Sidebar({ stats, mobileOpen, onClose }) {
   const location = useLocation();
 
   const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
+    if (path === '/') return location.pathname === '/' && !location.search;
+    
+    const [pathname, search] = path.split('?');
+    if (search) {
+      return location.pathname === pathname && location.search.includes(search);
+    }
+    
+    if (path === '/reports') return location.pathname === '/reports' && (!location.search || !location.search.includes('tab=cashbook'));
+    
+    return location.pathname.startsWith(pathname);
   };
 
   const initials = user?.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U';

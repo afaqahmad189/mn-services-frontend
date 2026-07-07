@@ -65,9 +65,9 @@ export default function InvoiceListPage() {
         <div className="filter-bar">
           <div className="header-search" style={{ flex: 1, minWidth: '220px' }}>
             <span>🔍</span>
-            <input 
-              type="text" 
-              placeholder="Search registration, customer, invoice..." 
+            <input
+              type="text"
+              placeholder="Search registration, customer, invoice..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
@@ -92,7 +92,7 @@ export default function InvoiceListPage() {
           <div className="skeleton-container">
             <div className="card">
               <div className="skeleton skeleton-title" />
-              {[1,2,3,4,5,6,7,8,9,10].map(i => <div key={i} className="skeleton-row skeleton" style={{ height: '48px' }} />)}
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => <div key={i} className="skeleton-row skeleton" style={{ height: '48px' }} />)}
             </div>
           </div>
         ) : (
@@ -102,7 +102,8 @@ export default function InvoiceListPage() {
                 <thead>
                   <tr>
                     <th>Invoice #</th>
-                    <th>Customer</th>
+                    <th>Organization</th>
+                    <th>Customer Name</th>
                     <th>Registration No.</th>
                     <th>Challan</th>
                     <th>Plate</th>
@@ -113,20 +114,25 @@ export default function InvoiceListPage() {
                 </thead>
                 <tbody>
                   {invoices.length === 0 ? (
-                    <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px' }}>No invoices found</td></tr>
+                    <tr><td colSpan={9} style={{ textAlign: 'center', padding: '40px' }}>No invoices found</td></tr>
                   ) : (
                     invoices.map(inv => (
                       <tr key={inv.id}>
                         <td style={{ fontWeight: 600, color: 'var(--primary)' }}>{inv.invoiceNumber}</td>
-                        <td>{inv.customer?.name}</td>
+                        <td>
+                          {inv.customer?.name}
+                        </td>
+                        <td>
+                          {inv.customerName}
+                        </td>
                         <td><span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{inv.registrationNo}</span></td>
                         <td><span className={`badge ${CHALLAN_BADGE[inv.challanStatus]}`}>{inv.challanStatus}</span></td>
                         <td><span className={`badge ${PLATE_BADGE[inv.plateStatus]}`}>{inv.plateStatus}</span></td>
                         <td><span className={`badge ${STATUS_BADGE[inv.status]}`}>{inv.status}</span></td>
                         <td>Rs. {(+inv.totalAmount).toLocaleString()}</td>
                         <td style={{ textAlign: 'center' }}>
-                          <span 
-                            style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }} 
+                          <span
+                            style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
                             onClick={() => navigate(`/invoices/${inv.id}`)}
                           >
                             👁️ View Details

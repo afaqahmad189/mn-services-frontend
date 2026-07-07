@@ -7,7 +7,7 @@ import SearchableSelect from '../components/SearchableSelect';
 const emptyForm = {
   customerId: '', vendorId: '', registrationNo: '', newRegistrationNo: '',
   exciseOffice: '', referenceNo: '', contactDetails: '', choiceSpecialNo: '',
-  purpose: '', vehicle: '', applicationId: '', chassisNo: '', engineNo: '',
+  purpose: '', vehicle: '', applicationId: '', chassisNo: '', engineNo: '', customerName: '',
   registrationDate: new Date().toISOString().split('T')[0], cnic: '', address: '',
   challanAmount: 0, challanPaidByOfficeOrVendor: 'OFFICE', serviceCharges: 0, inspectionCharges: 0,
   additionalCharges: 0, discount: 0, amountReceived: 0, remarks: '',
@@ -107,6 +107,16 @@ export default function InvoiceFormPage({ editId }) {
     { value: 'false', label: 'No' },
   ];
 
+  const purposeOptions = [
+    { value: 'New Registration', label: 'New Registration' },
+    { value: 'Transfer', label: 'Transfer' },
+    { value: 'HPA Termination', label: 'HPA Termination' },
+    { value: 'HPA Marketing', label: 'HPA Marketing' },
+    { value: 'New Registration and HPA', label: 'New Registration and HPA' },
+    { value: 'Token and Transfer', label: 'Token and Transfer' },
+    { value: 'Token and HPA', label: 'Token and HPA' },
+  ];
+
   if (loading) return (
     <div className="page-content">
       <div className="card">
@@ -144,17 +154,18 @@ export default function InvoiceFormPage({ editId }) {
               <div className="card-title">📋 Primary Details</div>
             </div>
             <div className="form-grid">
-              <Field label="Customer" field="customerId" required form={form} onChange={set}>
+              <Field label="Organization" field="customerId" required form={form} onChange={set}>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <SearchableSelect
                     options={customerOptions}
                     value={String(form.customerId)}
                     onChange={setVal('customerId')}
-                    placeholder="Search customer..."
+                    placeholder="Search organization..."
                   />
                   <button type="button" className="btn btn-outline btn-sm" style={{ whiteSpace: 'nowrap' }} onClick={() => setShowNewCustomer(true)}>+ New</button>
                 </div>
               </Field>
+              <Field label="Customer Name" field="customerName" form={form} onChange={set} />
               <Field label="Excise Office / Vendor" field="vendorId" form={form} onChange={set}>
                 <SearchableSelect
                   options={[{ value: '', label: 'None' }, ...vendorOptions]}
@@ -169,7 +180,14 @@ export default function InvoiceFormPage({ editId }) {
               <Field label="Reference No." field="referenceNo" form={form} onChange={set} />
               <Field label="Contact Details" field="contactDetails" form={form} onChange={set} />
               <Field label="Choice / Special No." field="choiceSpecialNo" form={form} onChange={set} />
-              <Field label="Purpose" field="purpose" form={form} onChange={set} />
+              <Field label="Purpose" field="purpose" form={form} onChange={set}>
+                <SearchableSelect
+                  options={purposeOptions}
+                  value={form.purpose}
+                  onChange={setVal('purpose')}
+                  placeholder="Select purpose..."
+                />
+              </Field>
               <Field label="Vehicle" field="vehicle" form={form} onChange={set} />
               <Field label="Application ID" field="applicationId" form={form} onChange={set} />
               <Field label="Chassis No." field="chassisNo" form={form} onChange={set} />
@@ -275,7 +293,7 @@ export default function InvoiceFormPage({ editId }) {
         <div className="modal-overlay" onClick={() => setShowNewCustomer(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <div className="modal-title">👤 Add New Customer</div>
+              <div className="modal-title">👤 Add New Organization</div>
               <button className="btn-icon" onClick={() => setShowNewCustomer(false)}>✕</button>
             </div>
             <div className="modal-body">
@@ -290,7 +308,7 @@ export default function InvoiceFormPage({ editId }) {
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setShowNewCustomer(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSaveCustomer}>Save Customer</button>
+              <button className="btn btn-primary" onClick={handleSaveCustomer}>Save Organization</button>
             </div>
           </div>
         </div>
