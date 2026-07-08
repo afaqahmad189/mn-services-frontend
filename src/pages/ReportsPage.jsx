@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { generatePDF } from '../utils/pdfGenerator';
 import { api, useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
@@ -45,7 +46,7 @@ export default function ReportsPage() {
       const [f, c, p, m, cb] = await Promise.all([
         api.get('/reports/financial', { params: filters }),
         api.get('/reports/cases', { params: { ...filters, page: casesPage, limit } }),
-        api.get('/reports/pending-balances', { params: { search: filters.search, page: pendingPage, limit } }),
+        api.get('/reports/pending-balances', { params: { search: filters.search, from: filters.from, to: filters.to, status: filters.status, page: pendingPage, limit } }),
         api.get('/reports/monthly-revenue'),
         api.get('/reports/cash-book', { params: { date: filters.cashBookDate } }),
       ]);
@@ -95,6 +96,10 @@ export default function ReportsPage() {
     searchRef.current?.focus();
   }, [tab]);
 
+  const handleSavePDF = () => {
+    generatePDF('printable-area', `Report_${tab}_${new Date().toLocaleDateString()}.pdf`, 'landscape');
+  };
+
   return (
     <div>
       <div className='toptab' style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: '#fff', padding: '24px' }}>
@@ -103,7 +108,7 @@ export default function ReportsPage() {
           <div style={{ display: 'flex', gap: '8px' }}>
             {hasPermission('report:print') && (
               <>
-                <button className="btn" style={{ background: 'var(--success)', color: '#fff', border: 'none' }} onClick={() => { alert("Please select 'Save as PDF' in the print dialog as the destination."); window.print(); }}>💾 Save PDF</button>
+                <button className="btn" style={{ background: 'var(--success)', color: '#fff', border: 'none' }} onClick={handleSavePDF}>💾 Save PDF</button>
                 <button className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }} onClick={() => window.print()}>🖨️ Print Report</button>
               </>
             )}
@@ -129,8 +134,20 @@ export default function ReportsPage() {
             <span>→</span>
             <input type="date" className="form-control" style={{ width: '160px' }} value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} />
             <select className="form-control" style={{ width: '160px' }} value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}>
-              <option value="">All Status</option><option value="ACTIVE">Active</option><option value="COMPLETED">Completed</option>
+              <option value="">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="COMPLETED">Completed</option>
             </select>
+            {(filters.search || filters.from || filters.to || filters.status) && (
+              <button
+                className="btn btn-sm btn-outline"
+                style={{ whiteSpace: 'nowrap', color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                onClick={() => setFilters(f => ({ ...f, search: '', from: '', to: '', status: '' }))}
+              >
+                ✕ Reset Filters
+              </button>
+            )}
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>
               {tab === 'cases' ? `${casesTotal} results` : `${pendingTotal} results`}
             </div>
@@ -166,7 +183,7 @@ export default function ReportsPage() {
             )}
           </div>
         ) : (
-          <>
+          <div id="printable-area">
             {tab === 'financial' && financial && (
               <div className="stat-grid mb-6">
                 {[
@@ -246,21 +263,24 @@ export default function ReportsPage() {
                 <div className="table-container">
                   <table>
                     <thead>
-                      <tr><th>Organization</th><th>Car Number</th><th>Invoice #</th><th>Total Bill</th><th>Amount Received</th><th>Balance</th><th>Aging</th></tr>
+                      <tr><th>Invoice #</th><th>Organization</th><th>Customer Name</th><th>Car Number</th><th>Status</th><th>Total Bill</th><th>Amount Received</th><th>Balance</th><th>Created At</th><th>Aging</th></tr>
                     </thead>
                     <tbody>
                       {pending.map(inv => {
                         const days = Math.floor((Date.now() - new Date(inv.createdAt)) / 86400000);
                         return (
                           <tr key={inv.id}>
-                            <td>{inv.customer?.name} {inv.customerName ? `(${inv.customerName})` : ''}</td>
-                            <td>{inv.registrationNo || '—'}</td>
                             <td style={{ fontWeight: 600, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate(`/invoices/${inv.id}`)}>
                               {inv.invoiceNumber}
                             </td>
+                            <td>{inv.customer?.name || '—'}</td>
+                            <td>{inv.customerName || '—'}</td>
+                            <td>{inv.registrationNo || '—'}</td>
+                            <td><span className={`badge ${STATUS_COLORS[inv.status] || 'badge-info'}`}>{inv.status}</span></td>
                             <td>Rs. {(+inv.totalAmount || 0).toLocaleString()}</td>
                             <td style={{ color: 'var(--success)' }}>Rs. {(+inv.amountReceived || 0).toLocaleString()}</td>
                             <td style={{ color: 'var(--danger)', fontWeight: 700 }}>Rs. {(+inv.remainingBalance || 0).toLocaleString()}</td>
+                            <td>{new Date(inv.createdAt).toLocaleDateString()}</td>
                             <td><span className={`badge ${days > 30 ? 'badge-danger' : days > 15 ? 'badge-warning' : 'badge-info'}`}>{days} days</span></td>
                           </tr>
                         );
@@ -417,7 +437,7 @@ export default function ReportsPage() {
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>

@@ -1862,3 +1862,11 @@ tfoot td {
     font-size: 0.9rem;
   }
 }
+/* Print mode overrides for html2pdf rendering */
+.pdf-generating .no-print {
+  display: none !important;
+}
+.pdf-generating .form-f-input {
+  background: transparent !important;
+  border: none !important;
+}

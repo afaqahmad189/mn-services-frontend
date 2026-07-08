@@ -51,7 +51,7 @@ export default function SmartCardFormPage() {
           ← Back
         </button>
         <button className="btn btn-primary" onClick={() => window.print()}>
-          Print Form
+          🖨️ Print Form
         </button>
       </div>
 

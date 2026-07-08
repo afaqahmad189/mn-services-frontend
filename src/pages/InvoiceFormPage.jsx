@@ -248,6 +248,7 @@ export default function InvoiceFormPage({ editId }) {
                   placeholder="Select status..."
                 />
               </Field>
+              <Field label="Status Date" field="statusChangeDate" type="date" form={form} onChange={set} />
               <Field label="Includes Smart Card?" field="hasSmartCard" form={form} onChange={() => { }}>
                 <SearchableSelect
                   options={yesNoOptions}

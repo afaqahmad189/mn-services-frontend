@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { generatePDF } from '../utils/pdfGenerator';
 
 const INITIAL_FIELDS = [
   { "id": 1781260553948, "x": 200.34375, "y": 126.40625, "w": 550, "h": 24, "label": "Field 1", "value": "" },
@@ -74,7 +75,7 @@ export default function FormFPage() {
           ← Back
         </button>
         <button className="btn btn-primary" onClick={() => window.print()}>
-          Print Form
+          🖨️ Print Form
         </button>
       </div>
 

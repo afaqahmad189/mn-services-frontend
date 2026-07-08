@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { api } from "../context/AuthContext";
 import { useAuth } from "../context/AuthContext";
+import { generatePDF } from "../utils/pdfGenerator";
 import { buildQuotationData } from "../utils/quotationCalculator";
 import {
   CHALLAN_LABELS,
@@ -147,6 +148,10 @@ export default function QuotationPreview() {
   const docTitle = printMode === 'invoice' ? 'INVOICE' : 'QUOTATION';
   const docNumberLabel = printMode === 'invoice' ? 'INVOICE NO:' : 'QUOTATION NO:';
 
+  const handleSavePDF = () => {
+    generatePDF('quotation-print', `${docTitle}_${form.customerName || 'Customer'}_${new Date().toLocaleDateString()}.pdf`, 'portrait');
+  };
+
   return (
     <div className="quotation-page">
       <div className="no-print quotation-actions">
@@ -178,6 +183,9 @@ export default function QuotationPreview() {
               onClick={() => setPrintMode('invoice')}
             >
               🧾 Invoice
+            </button>
+            <button className="btn btn-primary" style={{ background: 'var(--success)', border: 'none' }} onClick={handleSavePDF}>
+              💾 Save PDF
             </button>
             <button className="btn btn-primary" onClick={() => window.print()}>
               🖨️ Print
