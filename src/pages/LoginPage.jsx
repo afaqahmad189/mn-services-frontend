@@ -48,7 +48,6 @@ export default function LoginPage() {
           <div className="form-group" style={{ marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <label className="form-label required">Password</label>
-              <button type="button" className="btn-link" style={{ fontSize: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--primary)' }} onClick={() => navigate('/forgot-password')}>Forgot password?</button>
             </div>
             <input
               type="password" className="form-control"
@@ -61,12 +60,6 @@ export default function LoginPage() {
             {loading ? '🔄 Signing in...' : '🔐 Sign In'}
           </button>
         </form>
-
-        <div style={{ textAlign: 'center', marginTop: '24px', padding: '16px', background: 'var(--bg)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          <strong>Default Credentials:</strong><br />
-          Email: admin@mnservices.com<br />
-          Password: Admin@12345
-        </div>
       </div>
     </div>
   );
