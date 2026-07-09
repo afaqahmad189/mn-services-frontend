@@ -26,6 +26,7 @@ function AmountCell({ value, onChange, editable = true }) {
   return (
     <input
       className="bill-input"
+      style={{ border: 'none' }}
       type="number"
       min="0"
       value={value || ""}
