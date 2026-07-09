@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
+import Modal from '../components/Modal';
 
 export default function CustomersPage() {
   const navigate = useNavigate();
@@ -97,24 +98,26 @@ export default function CustomersPage() {
         )}
       </div>
 
-      {modal && (
-        <div className="modal-overlay" onClick={() => setModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><div className="modal-title">{editId ? 'Edit Customer' : 'New Customer'}</div><button className="btn-icon" onClick={() => setModal(false)}>✕</button></div>
-            <div className="modal-body">
-              <div className="form-grid">
-                {[['Name', 'name', true], ['Phone', 'phone', true], ['CNIC', 'cnic'], ['Email', 'email'], ['Address', 'address']].map(([label, field, req]) => (
-                  <div key={field} className="form-group">
-                    <label className={`form-label${req ? ' required' : ''}`}>{label}</label>
-                    <input className="form-control" value={form[field] || ''} onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))} required={req} />
-                  </div>
-                ))}
-              </div>
+      <Modal
+        open={modal}
+        onClose={() => setModal(false)}
+        title={editId ? 'Edit Customer' : 'New Customer'}
+        footer={
+          <>
+            <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
+            <button className="btn btn-primary" onClick={save}>Save</button>
+          </>
+        }
+      >
+        <div className="form-grid">
+          {[['Name', 'name', true], ['Phone', 'phone', true], ['CNIC', 'cnic'], ['Email', 'email'], ['Address', 'address']].map(([label, field, req]) => (
+            <div key={field} className="form-group">
+              <label className={`form-label${req ? ' required' : ''}`}>{label}</label>
+              <input className="form-control" value={form[field] || ''} onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))} required={req} />
             </div>
-            <div className="modal-footer"><button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button><button className="btn btn-primary" onClick={save}>Save</button></div>
-          </div>
+          ))}
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

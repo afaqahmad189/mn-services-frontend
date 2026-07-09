@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { exportToExcel } from '../utils/helpers';
+import { exportToExcel, computeRunningBalance, todayISO } from '../utils/helpers';
 
 export default function VendorLedgerPage() {
   const [view, setView] = useState('overview'); // 'overview' or 'detail'
@@ -15,7 +15,7 @@ export default function VendorLedgerPage() {
     amount: '',
     paymentMethod: 'CASH',
     description: '',
-    transactionDate: new Date().toISOString().split('T')[0],
+    transactionDate: todayISO(),
   });
   const [savingPayment, setSavingPayment] = useState(false);
 
@@ -49,20 +49,7 @@ export default function VendorLedgerPage() {
             setView('detail');
             const lRes = await api.get(`/vendors/${stateVendorId}/ledger`);
 
-            const sorted = [...lRes.data].sort((a, b) => {
-              const dateA = new Date(a.transactionDate || a.createdAt);
-              const dateB = new Date(b.transactionDate || b.createdAt);
-              return dateA - dateB || a.id - b.id;
-            });
-
-            let balance = 0;
-            const withBalance = sorted.map(entry => {
-              if (entry.type === 'CREDIT') balance += +entry.amount;
-              else balance -= +entry.amount;
-              return { ...entry, runningBalance: balance };
-            });
-
-            setLedger(withBalance.reverse());
+            setLedger(computeRunningBalance(lRes.data, 'vendor'));
           }
         }
       } catch (err) {
@@ -92,20 +79,7 @@ export default function VendorLedgerPage() {
       const freshVendor = vRes.data.find(v => v.id === vendor.id);
       if (freshVendor) setSelectedVendor(freshVendor);
 
-      const sorted = [...lRes.data].sort((a, b) => {
-        const dateA = new Date(a.transactionDate || a.createdAt);
-        const dateB = new Date(b.transactionDate || b.createdAt);
-        return dateA - dateB || a.id - b.id;
-      });
-
-      let balance = 0;
-      const withBalance = sorted.map(entry => {
-        if (entry.type === 'CREDIT') balance += +entry.amount;
-        else balance -= +entry.amount;
-        return { ...entry, runningBalance: balance };
-      });
-
-      setLedger(withBalance.reverse());
+      setLedger(computeRunningBalance(lRes.data, 'vendor'));
     } finally {
       setLoading(false);
     }
@@ -122,7 +96,7 @@ export default function VendorLedgerPage() {
         amount: '',
         paymentMethod: 'CASH',
         description: '',
-        transactionDate: new Date().toISOString().split('T')[0],
+        transactionDate: todayISO(),
       });
       openLedger(selectedVendor);
     } catch (err) {

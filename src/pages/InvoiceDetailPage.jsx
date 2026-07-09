@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api, useAuth } from '../context/AuthContext';
+import { PAYMENT_METHOD_OPTIONS } from '../utils/constants';
+import Modal from '../components/Modal';
 
 const PHASE_STEPS = [
   { key: 'challan', label: 'Challan', icon: '📋', statusField: 'challanStatus' },
@@ -356,51 +358,51 @@ export default function InvoiceDetailPage() {
         </div>
       </div>
 
-      {/* PAYMENT MODAL */}
-      {payModal && (
-        <div className="modal-overlay" onClick={() => setPayModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><div className="modal-title">💰 Record Payment</div><button className="btn-icon" onClick={() => setPayModal(false)}>✕</button></div>
-            <div className="modal-body">
-              <div className="form-group mb-4"><label className="form-label required">Amount (Rs.)</label><input type="number" className="form-control" value={payment.amount} onChange={e => setPayment(p => ({ ...p, amount: e.target.value }))} /></div>
-              <div className="form-group mb-4">
-                <label className="form-label required">Payment Method</label>
-                <select className="form-control" value={payment.paymentMethod} onChange={e => setPayment(p => ({ ...p, paymentMethod: e.target.value }))}>
-                  <option value="CASH">Cash (Physical Hand)</option>
-                  <option value="BANK">Bank Transfer (Digital)</option>
-                  <option value="CHEQUE">Cheque</option>
-                </select>
-              </div>
-              <div className="form-group"><label className="form-label">Description</label><input className="form-control" value={payment.description} onChange={e => setPayment(p => ({ ...p, description: e.target.value }))} placeholder="e.g. Cash payment" /></div>
-            </div>
-            <div className="modal-footer"><button className="btn btn-outline" onClick={() => setPayModal(false)}>Cancel</button><button className="btn btn-primary" onClick={handlePayment}>Save Payment</button></div>
-          </div>
+      <Modal
+        open={payModal}
+        onClose={() => setPayModal(false)}
+        title="💰 Record Payment"
+        footer={
+          <>
+            <button className="btn btn-outline" onClick={() => setPayModal(false)}>Cancel</button>
+            <button className="btn btn-primary" onClick={handlePayment}>Save Payment</button>
+          </>
+        }
+      >
+        <div className="form-group mb-4"><label className="form-label required">Amount (Rs.)</label><input type="number" className="form-control" value={payment.amount} onChange={e => setPayment(p => ({ ...p, amount: e.target.value }))} /></div>
+        <div className="form-group mb-4">
+          <label className="form-label required">Payment Method</label>
+          <select className="form-control" value={payment.paymentMethod} onChange={e => setPayment(p => ({ ...p, paymentMethod: e.target.value }))}>
+            {PAYMENT_METHOD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
         </div>
-      )}
+        <div className="form-group"><label className="form-label">Description</label><input className="form-control" value={payment.description} onChange={e => setPayment(p => ({ ...p, description: e.target.value }))} placeholder="e.g. Cash payment" /></div>
+      </Modal>
 
-      {/* WHATSAPP MODAL */}
-      {waModal.open && (
-        <div className="modal-overlay" onClick={() => setWaModal({ open: false, phase: '' })}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><div className="modal-title">💬 Send WhatsApp</div><button className="btn-icon" onClick={() => setWaModal({ open: false })}>✕</button></div>
-            <div className="modal-body">
-              <div className="form-group mb-4">
-                <label className="form-label">Select Template</label>
-                <select className="form-control" value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
-                  <option value="">Select template...</option>
-                  {templates.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-                </select>
-              </div>
-              {selectedTemplate && templates.find(t => t.name === selectedTemplate) && (
-                <div className="alert-banner info" style={{ whiteSpace: 'pre-wrap' }}>
-                  {templates.find(t => t.name === selectedTemplate)?.body}
-                </div>
-              )}
-            </div>
-            <div className="modal-footer"><button className="btn btn-outline" onClick={() => setWaModal({ open: false })}>Cancel</button><button className="btn btn-success" onClick={sendWhatsApp} disabled={!selectedTemplate}>Send Message 💬</button></div>
-          </div>
+      <Modal
+        open={waModal.open}
+        onClose={() => setWaModal({ open: false, phase: '' })}
+        title="💬 Send WhatsApp"
+        footer={
+          <>
+            <button className="btn btn-outline" onClick={() => setWaModal({ open: false })}>Cancel</button>
+            <button className="btn btn-success" onClick={sendWhatsApp} disabled={!selectedTemplate}>Send Message 💬</button>
+          </>
+        }
+      >
+        <div className="form-group mb-4">
+          <label className="form-label">Select Template</label>
+          <select className="form-control" value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
+            <option value="">Select template...</option>
+            {templates.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+          </select>
         </div>
-      )}
+        {selectedTemplate && templates.find(t => t.name === selectedTemplate) && (
+          <div className="alert-banner info" style={{ whiteSpace: 'pre-wrap' }}>
+            {templates.find(t => t.name === selectedTemplate)?.body}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

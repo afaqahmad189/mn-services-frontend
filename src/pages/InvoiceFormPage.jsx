@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../context/AuthContext';
-import { useAuth } from '../context/AuthContext';
+import { api, useAuth } from '../context/AuthContext';
 import SearchableSelect from '../components/SearchableSelect';
+import { todayISO } from '../utils/helpers';
 
 const emptyForm = {
   customerId: '', vendorId: '', registrationNo: '', newRegistrationNo: '',
   exciseOffice: '', referenceNo: '', contactDetails: '', choiceSpecialNo: '',
   purpose: '', vehicle: '', applicationId: '', chassisNo: '', engineNo: '', customerName: '',
-  registrationDate: new Date().toISOString().split('T')[0], cnic: '', address: '',
+  registrationDate: todayISO(), cnic: '', address: '',
   challanAmount: 0, challanPaidByOfficeOrVendor: 'OFFICE', serviceCharges: 0, inspectionCharges: 0,
   additionalCharges: 0, discount: 0, amountReceived: 0, remarks: '',
   status: 'DRAFT', hasSmartCard: true, hasNumberPlate: true, hasFile: true,

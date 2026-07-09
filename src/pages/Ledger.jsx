@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { exportToExcel } from '../utils/helpers';
+import { exportToExcel, computeRunningBalance } from '../utils/helpers';
+import Pagination from '../components/Pagination';
 
 export default function LedgerPage() {
   const [view, setView] = useState('overview'); // 'overview' or 'detail'
@@ -44,21 +45,7 @@ export default function LedgerPage() {
     setView('detail');
     setLoading(true);
     api.get(`/customers/${customer.id}/ledger`).then(r => {
-      // Calculate running balance: Sort by date ASC, sum up, then reverse for display
-      const sorted = [...r.data].sort((a, b) => {
-        const dateA = new Date(a.transactionDate || a.createdAt);
-        const dateB = new Date(b.transactionDate || b.createdAt);
-        return dateA - dateB || a.id - b.id; // Use ID as secondary sort for same-day entries
-      });
-
-      let balance = 0;
-      const withBalance = sorted.map(entry => {
-        if (entry.type === 'DEBIT') balance += +entry.amount;
-        else balance -= +entry.amount;
-        return { ...entry, runningBalance: balance };
-      });
-
-      setLedger(withBalance.reverse());
+      setLedger(computeRunningBalance(r.data, 'customer'));
     }).finally(() => setLoading(false));
   };
 
@@ -271,13 +258,7 @@ export default function LedgerPage() {
               </div>
 
               {/* PAGINATION */}
-              {totalCustomers > limit && (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '16px', borderTop: '1px solid var(--border)' }}>
-                  <button className="btn btn-sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>← Previous</button>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Page <strong>{page}</strong> of {Math.ceil(totalCustomers / limit)}</span>
-                  <button className="btn btn-sm" disabled={page >= Math.ceil(totalCustomers / limit)} onClick={() => setPage(p => p + 1)}>Next →</button>
-                </div>
-              )}
+              <Pagination page={page} total={totalCustomers} limit={limit} onChange={setPage} label="customers" />
             </div>
           </>
         )}

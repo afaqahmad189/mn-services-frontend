@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { api } from '../context/AuthContext';
 import SearchableSelect from '../components/SearchableSelect';
+import Modal from '../components/Modal';
+import { todayISO } from '../utils/helpers';
+import { PAYMENT_METHOD_OPTIONS } from '../utils/constants';
 
 export default function ExpensesPage() {
   const [heads, setHeads] = useState([]);
@@ -11,7 +14,7 @@ export default function ExpensesPage() {
   const [headModal, setHeadModal] = useState(false);
   const [recModal, setRecModal] = useState(false);
   const [headForm, setHeadForm] = useState({ name: '', description: '' });
-  const [recForm, setRecForm] = useState({ headId: '', amount: '', description: '', expenseDate: new Date().toISOString().split('T')[0], paymentMethod: 'CASH' });
+  const [recForm, setRecForm] = useState({ headId: '', amount: '', description: '', expenseDate: todayISO(), paymentMethod: 'CASH' });
   const [filters, setFilters] = useState({ from: '', to: '', headId: '' });
   const [loading, setLoading] = useState(true);
 
@@ -151,56 +154,54 @@ export default function ExpensesPage() {
         )}
       </div>
 
-      {/* HEAD MODAL */}
-      {headModal && (
-        <div className="modal-overlay" onClick={() => setHeadModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><div className="modal-title">🗂️ New Expense Head</div><button className="btn-icon" onClick={() => setHeadModal(false)}>✕</button></div>
-            <div className="modal-body">
-              <div className="form-group mb-4"><label className="form-label required">Head Name</label><input className="form-control" value={headForm.name} onChange={e => setHeadForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Office Rent" /></div>
-              <div className="form-group"><label className="form-label">Description</label><textarea className="form-control" rows={3} value={headForm.description} onChange={e => setHeadForm(f => ({ ...f, description: e.target.value }))} /></div>
-            </div>
-            <div className="modal-footer"><button className="btn btn-outline" onClick={() => setHeadModal(false)}>Cancel</button><button className="btn btn-primary" onClick={saveHead}>Save Head</button></div>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={headModal}
+        onClose={() => setHeadModal(false)}
+        title="🗂️ New Expense Head"
+        footer={
+          <>
+            <button className="btn btn-outline" onClick={() => setHeadModal(false)}>Cancel</button>
+            <button className="btn btn-primary" onClick={saveHead}>Save Head</button>
+          </>
+        }
+      >
+        <div className="form-group mb-4"><label className="form-label required">Head Name</label><input className="form-control" value={headForm.name} onChange={e => setHeadForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Office Rent" /></div>
+        <div className="form-group"><label className="form-label">Description</label><textarea className="form-control" rows={3} value={headForm.description} onChange={e => setHeadForm(f => ({ ...f, description: e.target.value }))} /></div>
+      </Modal>
 
-      {/* RECORD MODAL */}
-      {recModal && (
-        <div className="modal-overlay" onClick={() => setRecModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><div className="modal-title">💸 Add Expense</div><button className="btn-icon" onClick={() => setRecModal(false)}>✕</button></div>
-            <div className="modal-body">
-              <div className="form-grid">
-                <div className="form-group"><label className="form-label required">Expense Head</label>
-                  <SearchableSelect
-                    options={[{ value: '', label: 'Select Head...' }, ...heads.map(h => ({ value: String(h.id), label: h.name }))]}
-                    value={String(recForm.headId)}
-                    onChange={(v) => setRecForm(f => ({ ...f, headId: v }))}
-                    placeholder="Select Head..."
-                  />
-                </div>
-                <div className="form-group"><label className="form-label required">Amount (Rs.)</label><input type="number" className="form-control" value={recForm.amount} onChange={e => setRecForm(f => ({ ...f, amount: e.target.value }))} /></div>
-                <div className="form-group"><label className="form-label required">Date</label><input type="date" className="form-control" value={recForm.expenseDate} onChange={e => setRecForm(f => ({ ...f, expenseDate: e.target.value }))} /></div>
-                <div className="form-group"><label className="form-label">Payment Method</label>
-                  <SearchableSelect
-                    options={[
-                      { value: 'CASH', label: 'Cash' },
-                      { value: 'BANK', label: 'Bank' },
-                      { value: 'CHEQUE', label: 'Cheque' },
-                    ]}
-                    value={recForm.paymentMethod}
-                    onChange={(v) => setRecForm(f => ({ ...f, paymentMethod: v }))}
-                    placeholder="Select method..."
-                  />
-                </div>
-                <div className="form-group" style={{ gridColumn: 'span 2' }}><label className="form-label">Description</label><textarea className="form-control" rows={2} value={recForm.description} onChange={e => setRecForm(f => ({ ...f, description: e.target.value }))} /></div>
-              </div>
-            </div>
-            <div className="modal-footer"><button className="btn btn-outline" onClick={() => setRecModal(false)}>Cancel</button><button className="btn btn-primary" onClick={saveRecord}>Save Expense</button></div>
+      <Modal
+        open={recModal}
+        onClose={() => setRecModal(false)}
+        title="💸 Add Expense"
+        footer={
+          <>
+            <button className="btn btn-outline" onClick={() => setRecModal(false)}>Cancel</button>
+            <button className="btn btn-primary" onClick={saveRecord}>Save Expense</button>
+          </>
+        }
+      >
+        <div className="form-grid">
+          <div className="form-group"><label className="form-label required">Expense Head</label>
+            <SearchableSelect
+              options={[{ value: '', label: 'Select Head...' }, ...heads.map(h => ({ value: String(h.id), label: h.name }))]}
+              value={String(recForm.headId)}
+              onChange={(v) => setRecForm(f => ({ ...f, headId: v }))}
+              placeholder="Select Head..."
+            />
           </div>
+          <div className="form-group"><label className="form-label required">Amount (Rs.)</label><input type="number" className="form-control" value={recForm.amount} onChange={e => setRecForm(f => ({ ...f, amount: e.target.value }))} /></div>
+          <div className="form-group"><label className="form-label required">Date</label><input type="date" className="form-control" value={recForm.expenseDate} onChange={e => setRecForm(f => ({ ...f, expenseDate: e.target.value }))} /></div>
+          <div className="form-group"><label className="form-label">Payment Method</label>
+            <SearchableSelect
+              options={PAYMENT_METHOD_OPTIONS}
+              value={recForm.paymentMethod}
+              onChange={(v) => setRecForm(f => ({ ...f, paymentMethod: v }))}
+              placeholder="Select method..."
+            />
+          </div>
+          <div className="form-group" style={{ gridColumn: 'span 2' }}><label className="form-label">Description</label><textarea className="form-control" rows={2} value={recForm.description} onChange={e => setRecForm(f => ({ ...f, description: e.target.value }))} /></div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

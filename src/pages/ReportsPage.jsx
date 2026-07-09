@@ -2,19 +2,11 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { generatePDF } from '../utils/pdfGenerator';
 import { api, useAuth } from '../context/AuthContext';
+import { STATUS_COLORS } from '../utils/constants';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#1565C0', '#42A5F5', '#2E7D32', '#E65100', '#C62828', '#6A1B9A'];
 
-const STATUS_COLORS = {
-  PENDING: 'badge-warning',
-  ACTIVE: 'badge-info',
-  COMPLETED: 'badge-success',
-  CANCELLED: 'badge-danger',
-  RECEIVED: 'badge-success',
-  PAID: 'badge-success',
-  DELIVERED: 'badge-success',
-};
 
 export default function ReportsPage() {
   const { hasPermission } = useAuth();

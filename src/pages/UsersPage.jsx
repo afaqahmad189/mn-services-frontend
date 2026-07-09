@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../context/AuthContext';
+import Modal from '../components/Modal';
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -74,32 +75,34 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {modal && (
-        <div className="modal-overlay" onClick={() => setModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><div className="modal-title">{editId ? 'Edit User' : 'New User'}</div><button className="btn-icon" onClick={() => setModal(false)}>✕</button></div>
-            <div className="modal-body">
-              <div className="form-grid">
-                <div className="form-group"><label className="form-label required">Full Name</label><input className="form-control" value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} /></div>
-                <div className="form-group"><label className="form-label required">Email</label><input type="email" className="form-control" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
-                <div className="form-group"><label className="form-label">Phone</label><input className="form-control" value={form.phone || ''} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
-                <div className="form-group"><label className="form-label">{editId ? 'New Password (leave blank)' : 'Password *'}</label><input type="password" className="form-control" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} /></div>
-              </div>
-              <div className="section-divider" style={{ marginTop: '16px' }}>Assign Roles</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
-                {roles.map(r => (
-                  <button key={r.id} type="button"
-                    className={`btn btn-sm ${form.roleIds?.includes(r.id) ? 'btn-primary' : 'btn-outline'}`}
-                    onClick={() => toggleRole(r.id)}>
-                    {form.roleIds?.includes(r.id) ? '✓ ' : ''}{r.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="modal-footer"><button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button><button className="btn btn-primary" onClick={save}>Save User</button></div>
-          </div>
+      <Modal
+        open={modal}
+        onClose={() => setModal(false)}
+        title={editId ? 'Edit User' : 'New User'}
+        footer={
+          <>
+            <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
+            <button className="btn btn-primary" onClick={save}>Save User</button>
+          </>
+        }
+      >
+        <div className="form-grid">
+          <div className="form-group"><label className="form-label required">Full Name</label><input className="form-control" value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} /></div>
+          <div className="form-group"><label className="form-label required">Email</label><input type="email" className="form-control" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
+          <div className="form-group"><label className="form-label">Phone</label><input className="form-control" value={form.phone || ''} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
+          <div className="form-group"><label className="form-label">{editId ? 'New Password (leave blank)' : 'Password *'}</label><input type="password" className="form-control" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} /></div>
         </div>
-      )}
+        <div className="section-divider" style={{ marginTop: '16px' }}>Assign Roles</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+          {roles.map(r => (
+            <button key={r.id} type="button"
+              className={`btn btn-sm ${form.roleIds?.includes(r.id) ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => toggleRole(r.id)}>
+              {form.roleIds?.includes(r.id) ? '✓ ' : ''}{r.name}
+            </button>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -71,15 +71,6 @@ function calculateTokenTaxIsb(cc, price) {
   return price * 0.004;
 }
 
-// function calculateTokenTaxIsb(cc) {
-//   if (cc <= 1000) return 10000;
-//   if (cc <= 1200) return 1500;
-//   if (cc <= 1500) return 4000;
-//   if (cc <= 2000) return 5000;
-//   if (cc <= 2500) return 8000;
-//   return 12000; // 2501-3000
-// }
-
 function calculateIncomeTaxIsb(cc, customerType) {
   let base = 0;
   if (cc <= 1000) base = 10000;
@@ -103,8 +94,6 @@ export function calculateVehicleCharges(form) {
   const tokenPb = calculateTokenTaxPb(cc, price);
   const incomePb = calculateIncomeTaxPb(cc, form.customerType);
   const profPb = 200;
-  // const hpaPb = calculateHpaPb(cc);
-  // const transferPb = calculateTransferFeePb(cc);
   const hpaPb = 0;
   const transferPb = 0;
   const addlFeePb = calculateAdditionalRegFeePb(cc);

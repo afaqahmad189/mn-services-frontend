@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { api } from '../context/AuthContext';
-import { useAuth } from '../context/AuthContext';
+import { api, useAuth } from '../context/AuthContext';
 import SearchableSelect from '../components/SearchableSelect';
+import Pagination from '../components/Pagination';
 
 const STATUS_BADGE = {
   DRAFT: 'badge-gray', ACTIVE: 'badge-info',
@@ -145,13 +145,7 @@ export default function InvoiceListPage() {
               </table>
             </div>
 
-            {totalPages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '16px', borderTop: '1px solid var(--border)' }}>
-                <button className="btn btn-sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>← Previous</button>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Page <strong>{page}</strong> of {totalPages}</span>
-                <button className="btn btn-sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
-              </div>
-            )}
+            <Pagination page={page} total={total} limit={limit} onChange={setPage} label="cases" />
           </div>
         )}
       </div>

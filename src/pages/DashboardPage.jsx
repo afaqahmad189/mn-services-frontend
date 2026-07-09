@@ -1,16 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { STATUS_COLORS } from '../utils/constants';
 
-const STATUS_COLORS = {
-  PENDING: 'badge-warning',
-  ACTIVE: 'badge-info',
-  COMPLETED: 'badge-success',
-  CANCELLED: 'badge-danger',
-  RECEIVED: 'badge-success',
-  PAID: 'badge-success',
-  DELIVERED: 'badge-success',
-};
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
