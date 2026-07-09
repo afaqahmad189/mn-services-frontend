@@ -192,7 +192,7 @@ export default function InvoiceFormPage({ editId }) {
               <Field label="Application ID" field="applicationId" form={form} onChange={set} />
               <Field label="Chassis No." field="chassisNo" form={form} onChange={set} />
               <Field label="Engine No." field="engineNo" form={form} onChange={set} />
-              <Field label="CNIC" field="cnic" form={form} onChange={set} />
+              <Field label="CNIC / NTN" field="cnic" form={form} onChange={set} />
               <Field label="Registration Date" field="registrationDate" type="date" form={form} onChange={set} />
               <Field label="Address" field="address" form={form} onChange={set} />
             </div>
