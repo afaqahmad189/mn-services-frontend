@@ -4,6 +4,8 @@ import SearchableSelect from '../components/SearchableSelect';
 import Modal from '../components/Modal';
 import { todayISO } from '../utils/helpers';
 import { PAYMENT_METHOD_OPTIONS } from '../utils/constants';
+import toast from "react-hot-toast";
+
 
 export default function ExpensesPage() {
   const [heads, setHeads] = useState([]);
@@ -17,6 +19,20 @@ export default function ExpensesPage() {
   const [recForm, setRecForm] = useState({ headId: '', amount: '', description: '', expenseDate: todayISO(), paymentMethod: 'CASH' });
   const [filters, setFilters] = useState({ from: '', to: '', headId: '' });
   const [loading, setLoading] = useState(true);
+  const [editingRecord, setEditingRecord] = useState(null);
+  const openEdit = (record) => {
+    setEditingRecord(record);
+
+    setRecForm({
+      headId: String(record.headId || record.head?.id),
+      amount: record.amount,
+      description: record.description || '',
+      expenseDate: record.expenseDate,
+      paymentMethod: record.paymentMethod
+    });
+
+    setRecModal(true);
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -38,8 +54,52 @@ export default function ExpensesPage() {
   useEffect(() => { load(); }, [load]);
 
   const saveHead = async () => { await api.post('/expenses/heads', headForm); setHeadModal(false); setHeadForm({ name: '', description: '' }); load(); };
-  const saveRecord = async () => { await api.post('/expenses', recForm); setRecModal(false); setRecForm(f => ({ ...f, amount: '', description: '' })); load(); };
 
+  const saveRecord = async () => {
+    if (editingRecord) {
+      await api.put(`/expenses/${editingRecord.id}`, recForm);
+    } else {
+      await api.post('/expenses', recForm);
+    }
+
+    setEditingRecord(null);
+
+    setRecModal(false);
+
+    setRecForm({
+      headId: '',
+      amount: '',
+      description: '',
+      expenseDate: todayISO(),
+      paymentMethod: 'CASH'
+    });
+
+    load();
+  };
+  const closeExpenseModal = () => {
+    setRecModal(false);
+    setEditingRecord(null);
+
+    setRecForm({
+      headId: '',
+      amount: '',
+      description: '',
+      expenseDate: todayISO(),
+      paymentMethod: 'CASH'
+    });
+  };
+
+
+  const deleteExpense = async (id) => {
+    if (!window.confirm("Delete this Expense?")) return;
+    try {
+      await api.delete(`/expenses/${id}`);
+      toast.success("Expense deleted");
+      load();
+    } catch {
+      toast.error("Failed to delete quotation");
+    }
+  };
   return (
     <div>
       <div style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: '#fff', padding: '24px' }}>
@@ -104,7 +164,7 @@ export default function ExpensesPage() {
                 <div className="card" style={{ padding: 0 }}>
                   <div className="table-container">
                     <table>
-                      <thead><tr><th>Date</th><th>Head</th><th>Description</th><th>Method</th><th>Amount</th><th>Added By</th></tr></thead>
+                      <thead><tr><th>Date</th><th>Head</th><th>Description</th><th>Method</th><th>Amount</th><th>Added By</th> <th>Action</th></tr></thead>
                       <tbody>
                         {records.length === 0 ? <tr><td colSpan={6}><div className="empty-state" style={{ padding: '30px' }}><div className="empty-state-icon">💸</div><h3>No expenses recorded</h3></div></td></tr>
                           : records.map(r => (
@@ -115,6 +175,12 @@ export default function ExpensesPage() {
                               <td><span className="badge badge-gray">{r.paymentMethod}</span></td>
                               <td style={{ fontWeight: 700, color: 'var(--danger)' }}>Rs. {(+r.amount).toLocaleString()}</td>
                               <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{r.createdBy?.fullName}</td>
+                              <td>
+                                <div className="table-actions">
+                                  <button className="btn btn-sm btn-outline" onClick={() => openEdit(r)}>Edit</button>
+                                  <button className="btn btn-outline btn-sm" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => deleteExpense(r.id)}>Delete</button>
+                                </div>
+                              </td>
                             </tr>
                           ))}
                       </tbody>
@@ -171,11 +237,11 @@ export default function ExpensesPage() {
 
       <Modal
         open={recModal}
-        onClose={() => setRecModal(false)}
-        title="💸 Add Expense"
+        onClose={closeExpenseModal}
+        title={editingRecord ? "✏️ Edit Expense" : "💸 Add Expense"}
         footer={
           <>
-            <button className="btn btn-outline" onClick={() => setRecModal(false)}>Cancel</button>
+            <button className="btn btn-outline" onClick={closeExpenseModal}>Cancel</button>
             <button className="btn btn-primary" onClick={saveRecord}>Save Expense</button>
           </>
         }
