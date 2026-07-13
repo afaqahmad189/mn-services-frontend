@@ -110,6 +110,8 @@ function PhaseCard({ phase, invoice, onUpdate, onWhatsApp }) {
         </div>
         <div className="form-group"><label className="form-label">Received Date</label><input type="date" className="form-control" defaultValue={invoice.fileReceivedDate} onChange={set('fileReceivedDate')} /></div>
         <div className="form-group"><label className="form-label">Delivered Date</label><input type="date" className="form-control" defaultValue={invoice.fileDeliveredDate} onChange={set('fileDeliveredDate')} /></div>
+        <div className="form-group"><label className="form-label">Receiver Name</label><input className="form-control" defaultValue={invoice.fileReceiverName} onChange={set('fileReceiverName')} /></div>
+        <div className="form-group"><label className="form-label">Notes</label><textarea className="form-control" rows={2} defaultValue={invoice.fileNotes} onChange={set('fileNotes')} /></div>
       </div>
     );
     if (phase.key === 'smart-card') return (
@@ -122,6 +124,8 @@ function PhaseCard({ phase, invoice, onUpdate, onWhatsApp }) {
         </div>
         <div className="form-group"><label className="form-label">Received Date</label><input type="date" className="form-control" defaultValue={invoice.smartCardReceivedDate} onChange={set('smartCardReceivedDate')} /></div>
         <div className="form-group"><label className="form-label">Delivered Date</label><input type="date" className="form-control" defaultValue={invoice.smartCardDeliveredDate} onChange={set('smartCardDeliveredDate')} /></div>
+        <div className="form-group"><label className="form-label">Receiver Name</label><input className="form-control" defaultValue={invoice.smartCardReceiverName} onChange={set('smartCardReceiverName')} /></div>
+        <div className="form-group"><label className="form-label">Notes</label><textarea className="form-control" rows={2} defaultValue={invoice.smartCardNotes} onChange={set('smartCardNotes')} /></div>
       </div>
     );
   };

@@ -18,8 +18,9 @@ const defaultForm = {
   customerType: "Filer",
   state: "Punjab",
   type: "Reference",
+  challanAmount: "",
+  serviceCharges: "",
 };
-
 
 const vehicleTypeOptions = [
   { value: "New", label: "New" },
@@ -52,18 +53,17 @@ const stateOptions = [
   { value: "Both", label: "Both" },
 ];
 
-const type = [
+const typeOptions = [
   { value: "Reference", label: "Reference" },
   { value: "CNIC", label: "CNIC" },
   { value: "Contract", label: "Contract" },
 ];
 
-
-export default function QuotationPage() {
+export default function InvoiceGeneratorPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState(defaultForm);
-  const [cars, setCars] = useState([])
+  const [cars, setCars] = useState([]);
 
   const load = useCallback(async () => {
     const { data } = await api.get('/cars/web-cars');
@@ -84,6 +84,8 @@ export default function QuotationPage() {
         invoicePrice: invoicePrice ? String(invoicePrice) : "",
         withholdingTax: withholdingTax ? String(withholdingTax) : "",
         carPrice: carPrice ? String(carPrice) : "",
+        challanAmount: loaded.challanAmount ? String(loaded.challanAmount) : "",
+        serviceCharges: loaded.serviceCharges ? String(loaded.serviceCharges) : "",
         dated: loaded.dated || defaultForm.dated,
       });
     }
@@ -105,11 +107,11 @@ export default function QuotationPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate("/quotation/preview", {
+    navigate("/invoice-generator/preview", {
       state: {
         form,
         editId: location.state?.editId || null,
-        quotationNumber: location.state?.quotationNumber || null,
+        invoiceNumber: location.state?.invoiceNumber || null,
       },
     });
   };
@@ -118,182 +120,100 @@ export default function QuotationPage() {
     <div className="login-page">
       <div className="login-card" style={{ maxWidth: "800px" }}>
         <div className="login-logo">
-          <div className="login-logo-icon">Q</div>
-          <h1>Quotation Form</h1>
-          <p>Enter vehicle details to generate quotation</p>
+          <div className="login-logo-icon">I</div>
+          <h1>Invoice Generator</h1>
+          <p>Enter vehicle details to generate invoice</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label required">Date</label>
-              <input
-                className="form-control"
-                name="dated"
-                type="date"
-                value={form.dated}
-                onChange={handleChange}
-                required
-              />
+              <input className="form-control" name="dated" type="date" value={form.dated} onChange={handleChange} required />
             </div>
 
             <div className="form-group">
               <label className="form-label required">Vehicle Type</label>
-              <SearchableSelect
-                options={vehicleTypeOptions}
-                value={form.vehicleType}
-                onChange={setField('vehicleType')}
-                placeholder="Select vehicle type..."
-              />
+              <SearchableSelect options={vehicleTypeOptions} value={form.vehicleType} onChange={setField('vehicleType')} placeholder="Select vehicle type..." />
             </div>
 
             <div className="form-group">
               <label className="form-label required">Customer Name</label>
-              <input
-                className="form-control"
-                name="customerName"
-                value={form.customerName}
-                onChange={handleChange}
-                required
-              />
+              <input className="form-control" name="customerName" value={form.customerName} onChange={handleChange} required />
             </div>
 
             <div className="form-group">
-              <label className="form-label required">Type of Qutation</label>
-              <SearchableSelect
-                options={type}
-                value={form.type}
-                onChange={setField('type')}
-                placeholder="Select type..."
-              />
+              <label className="form-label required">Type of Invoice</label>
+              <SearchableSelect options={typeOptions} value={form.type} onChange={setField('type')} placeholder="Select type..." />
             </div>
 
             <div className="form-group">
               <label className="form-label">Detail</label>
-              <input
-                className="form-control"
-                name="contractNo"
-                value={form.contractNo}
-                onChange={handleChange}
-              />
+              <input className="form-control" name="contractNo" value={form.contractNo} onChange={handleChange} />
             </div>
 
             <div className="form-group">
               <label className="form-label">Registration No</label>
-              <input
-                className="form-control"
-                name="registrationNo"
-                value={form.registrationNo}
-                onChange={handleChange}
-                placeholder="e.g. FD-18-24"
-              />
+              <input className="form-control" name="registrationNo" value={form.registrationNo} onChange={handleChange} placeholder="e.g. FD-18-24" />
             </div>
 
             <div className="form-group">
               <label className="form-label">Special No</label>
-              <input
-                className="form-control"
-                name="specialNo"
-                value={form.specialNo}
-                onChange={handleChange}
-                placeholder="e.g. FD-18-24"
-              />
+              <input className="form-control" name="specialNo" value={form.specialNo} onChange={handleChange} placeholder="e.g. FD-18-24" />
             </div>
 
             <div className="form-group">
               <label className="form-label required">CC</label>
-              <SearchableSelect
-                options={ccOptions}
-                value={form.cc}
-                onChange={setField('cc')}
-                placeholder="Select CC..."
-              />
+              <SearchableSelect options={ccOptions} value={form.cc} onChange={setField('cc')} placeholder="Select CC..." />
             </div>
 
             <div className="form-group">
-              <label className="form-label required">Invoice Price</label>
-              <input
-                className="form-control"
-                name="invoicePrice"
-                type="number"
-                min="0"
-                value={form.invoicePrice}
-                onChange={handleChange}
-                required={form.vehicleType === "New"}
-              />
+              <label className="form-label">Invoice Price</label>
+              <input className="form-control" name="invoicePrice" type="number" min="0" value={form.invoicePrice} onChange={handleChange} />
             </div>
 
             <div className="form-group">
               <label className="form-label">Withholding Tax</label>
-              <input
-                className="form-control"
-                name="withholdingTax"
-                type="number"
-                min="0"
-                value={form.withholdingTax}
-                onChange={handleChange}
-              />
+              <input className="form-control" name="withholdingTax" type="number" min="0" value={form.withholdingTax} onChange={handleChange} />
             </div>
 
             <div className="form-group">
               <label className="form-label">Car Value (Auto)</label>
-              <input
-                className="form-control"
-                name="carPrice"
-                type="number"
-                value={form.carPrice}
-                readOnly
-                style={{ background: "var(--bg-muted, #f5f5f5)", cursor: "not-allowed" }}
-              />
+              <input className="form-control" name="carPrice" type="number" value={form.carPrice} readOnly style={{ background: "var(--bg-muted, #f5f5f5)", cursor: "not-allowed" }} />
             </div>
 
             <div className="form-group">
               <label className="form-label required">Maker / Model</label>
-              <SearchableSelect
-                options={cars.map(c => ({ value: c.name, label: c.name }))}
-                value={form.maker}
-                onChange={setField('maker')}
-                placeholder="Search vehicle model..."
-              />
+              <SearchableSelect options={cars.map(c => ({ value: c.name, label: c.name }))} value={form.maker} onChange={setField('maker')} placeholder="Search vehicle model..." />
             </div>
 
             <div className="form-group">
               <label className="form-label required">Customer Type</label>
-              <SearchableSelect
-                options={customerTypeOptions}
-                value={form.customerType}
-                onChange={setField('customerType')}
-                placeholder="Select customer type..."
-              />
+              <SearchableSelect options={customerTypeOptions} value={form.customerType} onChange={setField('customerType')} placeholder="Select customer type..." />
             </div>
 
             <div className="form-group">
               <label className="form-label required">State</label>
-              <SearchableSelect
-                options={stateOptions}
-                value={form.state}
-                onChange={setField('state')}
-                placeholder="Select state..."
-              />
+              <SearchableSelect options={stateOptions} value={form.state} onChange={setField('state')} placeholder="Select state..." />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label required">Challan Amount</label>
+              <input className="form-control" name="challanAmount" type="number" min="0" value={form.challanAmount} onChange={handleChange} required />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label required">Service Charges</label>
+              <input className="form-control" name="serviceCharges" type="number" min="0" value={form.serviceCharges} onChange={handleChange} required />
             </div>
           </div>
 
-          {form.vehicleType !== "New" && (
-            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 16, marginTop: 12 }}>
-              Auto-calculation applies only for New vehicles. Other types start with zero amounts for manual entry.
-            </p>
-          )}
-
           <div style={{ display: "flex", gap: 12, marginTop: 25 }}>
             <button className="btn btn-primary btn-lg" type="submit" style={{ flex: 1 }}>
-              Generate Quotation
+              Generate Invoice
             </button>
-            <button
-              className="btn btn-outline btn-lg"
-              type="button"
-              onClick={() => navigate("/quotations/list")}
-            >
-              Saved Quotations
+            <button className="btn btn-outline btn-lg" type="button" onClick={() => navigate("/invoice-generator/list")}>
+              Saved Invoices
             </button>
           </div>
         </form>

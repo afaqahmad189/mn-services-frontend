@@ -12,6 +12,8 @@ const navItems = [
     section: 'Cases', items: [
       { path: '/quotations', icon: '📋', label: 'New Quotation', section: 'quotation' },
       { path: '/quotations/list', icon: '📄', label: 'Quotation List', section: 'quotation' },
+      { path: '/invoice-generator', icon: '🧾', label: 'Invoice Generator', section: 'quotation' },
+      { path: '/invoice-generator/list', icon: '📃', label: 'Invoice Generator List', section: 'quotation' },
       { path: '/invoices/new', icon: '➕', label: 'New Invoice', section: 'invoice' },
       { path: '/invoices', icon: '📑', label: 'Invoice List', section: 'invoice' },
       { path: '/cars', icon: '🚕', label: 'Cars', section: 'cars' },

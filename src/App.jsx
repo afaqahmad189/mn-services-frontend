@@ -26,6 +26,9 @@ import PdfViewerPage from './pages/PdfViewerPage';
 import QuotationPage from './pages/quotation';
 import QuotationPreviewPage from './pages/quotationPreview';
 import QuotationListPage from './pages/QuotationListPage';
+import InvoiceGeneratorPage from './pages/invoiceGenerator';
+import InvoiceGeneratorPreviewPage from './pages/invoiceGeneratorPreview';
+import InvoiceGeneratorListPage from './pages/InvoiceGeneratorListPage';
 import FormToPage from './pages/FormToPage';
 import SmartCardFormPage from './pages/FormSmartCardPage';
 import FormNTNPage from './pages/FormNTNPage';
@@ -69,6 +72,9 @@ function AppRoutes() {
         <Route path="quotations" element={<RoleGuard section="quotation"><QuotationPage /></RoleGuard>} />
         <Route path="quotations/list" element={<RoleGuard section="quotation"><QuotationListPage /></RoleGuard>} />
         <Route path="quotation/preview" element={<RoleGuard section="quotation"><QuotationPreviewPage /></RoleGuard>} />
+        <Route path="invoice-generator" element={<RoleGuard section="quotation"><InvoiceGeneratorPage /></RoleGuard>} />
+        <Route path="invoice-generator/list" element={<RoleGuard section="quotation"><InvoiceGeneratorListPage /></RoleGuard>} />
+        <Route path="invoice-generator/preview" element={<RoleGuard section="quotation"><InvoiceGeneratorPreviewPage /></RoleGuard>} />
         <Route path="invoices" element={<RoleGuard section="invoice"><InvoiceListPage /></RoleGuard>} />
         <Route path="invoices/new" element={<RoleGuard section="invoice"><InvoiceFormPage /></RoleGuard>} />
         <Route path="invoices/:id" element={<RoleGuard section="invoice"><InvoiceDetailPage /></RoleGuard>} />
