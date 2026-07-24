@@ -23,7 +23,8 @@ export default function FormNTNPage() {
           border: 1px dashed rgba(21, 101, 192, 0.3);
           outline: none;
           font-family: inherit;
-          font-size: 14px;
+          font-size: 22px;
+          font-weight: bold;
           color: #000;
           padding: 0 4px;
         }

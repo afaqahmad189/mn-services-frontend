@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { generatePDF } from '../utils/pdfGenerator';
 
 const INITIAL_FIELDS = [
-  { "id": 1781260553948, "x": 200.34375, "y": 126.40625, "w": 550, "h": 24, "label": "Field 1", "value": "" },
+  { "id": 1781260553948, "x": 200.34375, "y": 129.40625, "w": 550, "h": 24, "label": "Field 1", "value": "" },
   { "id": 1781260560380, "x": 300.34375, "y": 150.40625, "w": 450, "h": 24, "label": "Field 2", "value": "" },
   { "id": 1781260563003, "x": 360.34375, "y": 172.40625, "w": 400, "h": 24, "label": "Field 3", "value": "" },
   { "id": 1781260581040, "x": 10.34375, "y": 198.40625, "w": 750, "h": 24, "label": "Field 4", "value": "" },
@@ -54,7 +54,8 @@ export default function FormFPage() {
           border: 1px dashed rgba(21, 101, 192, 0.3);
           outline: none;
           font-family: inherit;
-          font-size: 14px;
+          font-size: 22px;
+          font-weight: bold;
           color: #000;
           padding: 0 4px;
         }

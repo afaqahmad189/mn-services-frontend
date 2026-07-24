@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { generatePDF } from '../utils/pdfGenerator';
 import { api, useAuth } from '../context/AuthContext';
 import { STATUS_COLORS } from '../utils/constants';
+import Modal from '../components/Modal';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#1565C0', '#42A5F5', '#2E7D32', '#E65100', '#C62828', '#6A1B9A'];
@@ -26,6 +27,11 @@ export default function ReportsPage() {
   const [monthly, setMonthly] = useState([]);
   const [cashBook, setCashBook] = useState(null);
   const [cashBookMeta, setCashBookMeta] = useState({ openingBalance: 0, handoverAmount: 0 });
+  
+  // Independent Cash Entry State
+  const [showIncomeModal, setShowIncomeModal] = useState(false);
+  const [incomeData, setIncomeData] = useState({ amount: '', description: '', paymentMethod: 'CASH', incomeDate: new Date().toISOString().split('T')[0] });
+
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ from: '', to: '', status: '', search: '', cashBookDate: new Date().toISOString().split('T')[0] });
   const limit = 20;
@@ -61,6 +67,18 @@ export default function ReportsPage() {
       load();
     } catch (e) {
       alert('Error saving meta');
+    }
+  };
+
+  const handleSaveIncome = async () => {
+    try {
+      if (!incomeData.amount || !incomeData.description) return alert('Please enter amount and description');
+      await api.post('/incomes', incomeData);
+      setShowIncomeModal(false);
+      setIncomeData({ amount: '', description: '', paymentMethod: 'CASH', incomeDate: filters.cashBookDate });
+      load();
+    } catch (e) {
+      alert('Error saving cash entry');
     }
   };
 
@@ -296,6 +314,9 @@ export default function ReportsPage() {
                   <label style={{ fontWeight: 600 }}>Select Date:</label>
                   <input type="date" className="form-control" style={{ width: '200px' }} value={filters.cashBookDate} onChange={e => setFilters(f => ({ ...f, cashBookDate: e.target.value }))} />
                   <button className="btn btn-primary" onClick={load}>Generate Cash Book</button>
+                  <button className="btn" style={{ background: 'var(--success)', color: '#fff', marginLeft: 'auto' }} onClick={() => { setIncomeData(prev => ({...prev, incomeDate: filters.cashBookDate})); setShowIncomeModal(true); }}>
+                    ➕ Add Cash Entry (Income)
+                  </button>
                 </div>
 
                 <div id="cash-book-printable">
@@ -318,8 +339,17 @@ export default function ReportsPage() {
                           <tbody>
                             {cashBook.cashIn.map(item => (
                               <tr key={item.id}>
-                                <td>{item.customer?.name}</td>
-                                <td>{item.invoice?.invoiceNumber}</td>
+                                <td>
+                                  {item._source === 'INDEPENDENT' ? (
+                                    <span>
+                                      <span className="badge badge-success" style={{ marginRight: '6px', fontSize: '0.7rem' }}>Cash Entry</span>
+                                      {item.description}
+                                    </span>
+                                  ) : (
+                                    item.customer?.name || '—'
+                                  )}
+                                </td>
+                                <td>{item._source === 'INDEPENDENT' ? '—' : item.invoice?.invoiceNumber || '—'}</td>
                                 <td style={{ color: 'var(--success)', fontWeight: 600 }}>Rs. {(+item.amount).toLocaleString()}</td>
                               </tr>
                             ))}
@@ -427,6 +457,32 @@ export default function ReportsPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Add Income Modal */}
+                <Modal
+                  open={showIncomeModal}
+                  onClose={() => setShowIncomeModal(false)}
+                  title="➕ Add Cash Entry"
+                  footer={
+                    <>
+                      <button className="btn btn-outline" onClick={() => setShowIncomeModal(false)}>Cancel</button>
+                      <button className="btn btn-primary" onClick={handleSaveIncome}>Save Cash Entry</button>
+                    </>
+                  }
+                >
+                  <div className="form-group mb-4">
+                    <label className="form-label required">Amount (Rs.)</label>
+                    <input type="number" className="form-control" value={incomeData.amount} onChange={e => setIncomeData(d => ({ ...d, amount: e.target.value }))} autoFocus />
+                  </div>
+                  <div className="form-group mb-4">
+                    <label className="form-label required">Description (e.g., Loan Return)</label>
+                    <input type="text" className="form-control" value={incomeData.description} onChange={e => setIncomeData(d => ({ ...d, description: e.target.value }))} />
+                  </div>
+                  <div className="form-group mb-4">
+                    <label className="form-label required">Date</label>
+                    <input type="date" className="form-control" value={incomeData.incomeDate} onChange={e => setIncomeData(d => ({ ...d, incomeDate: e.target.value }))} />
+                  </div>
+                </Modal>
               </div>
             )}
           </div>
